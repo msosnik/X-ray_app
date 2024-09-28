@@ -17,6 +17,7 @@ public abstract class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NonNull
     @Column(unique = true)
     private String email;
 

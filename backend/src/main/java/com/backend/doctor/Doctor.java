@@ -1,6 +1,7 @@
 package com.backend.doctor;
 
 import com.backend.patient.Patient;
+import com.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,15 +13,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @Entity
 @Table(name="doctor")
-public class Doctor {
+public class Doctor extends User {
 
-    @Id
-    @GeneratedValue
-    private int id;
+    @Column(unique = true)
+    private int medicalLicenceId;
+    @Column(unique = true)
+    private int PhoneNumber;
     @NonNull
-    private String first_name;
-    @NonNull
-    private String last_name;
+    private String clinicAdress;
+
+    private String specialization;
+    private String availability;
+    private String workingHours;
+
     @ManyToMany
     @JoinTable(
             name = "doctor_patient", // Name of the join table

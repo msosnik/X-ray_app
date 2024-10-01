@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Integer> {
-    List<Patient> getPatientByDoctor_Id(int id);
+    List<Patient> getPatientByDoctors_Id(int id);
 }

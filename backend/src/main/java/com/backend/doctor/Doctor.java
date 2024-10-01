@@ -5,6 +5,7 @@ import com.backend.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -20,8 +21,7 @@ public class Doctor extends User {
     @Column(unique = true)
     private int PhoneNumber;
     @NonNull
-    private String clinicAdress;
-
+    private String clinicAddress;
     private String specialization;
     private String availability;
     private String workingHours;
@@ -34,4 +34,14 @@ public class Doctor extends User {
     )
     private List<Patient> patients;
 
+    public Doctor(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, int medicalLicenceId, int phoneNumber, String clinicAddress, String specialization, String availability, String workingHours) {
+        super(email, passwordHash, firstName, lastName, createdAt);
+        this.setMedicalLicenceId(medicalLicenceId);
+        this.setPhoneNumber(phoneNumber);
+        this.setClinicAddress(clinicAddress);
+        this.setSpecialization(specialization);
+        this.setAvailability(availability);
+        this.setWorkingHours(workingHours);
+
+    }
 }

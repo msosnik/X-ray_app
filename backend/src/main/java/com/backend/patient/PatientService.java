@@ -26,7 +26,7 @@ public class PatientService {
                 .stream()
                 .map(XRayImage::getId)
                 .collect(Collectors.toList());
-        List<Integer> doctorsList = patient.getDoctor()
+        List<Integer> doctorsList = patient.getDoctors()
                 .stream()
                 .map(Doctor::getId)
                 .collect(Collectors.toList());
@@ -54,6 +54,7 @@ public class PatientService {
                 patientDTO.getFirstName(),
                 patientDTO.getLastName(),
                 patientDTO.getCreatedAt(),
+
                 patientDTO.getDateOfBirth(),
                 patientDTO.getAddress(),
                 patientDTO.getPhoneNumber()
@@ -63,9 +64,9 @@ public class PatientService {
             List<XRayImage> xrayImages = xRayImageRepository.findAllById(patientDTO.getXrayImages());
             patient.setXrayImages(xrayImages);
         }
-        if (patientDTO.getDoctor() != null && !patientDTO.getDoctor().isEmpty()) {
-            List<Doctor> doctors = doctorRepository.findAllById(patientDTO.getDoctor());
-            patient.setDoctor(doctors);
+        if (patientDTO.getDoctorList() != null && !patientDTO.getDoctorList().isEmpty()) {
+            List<Doctor> doctors = doctorRepository.findAllById(patientDTO.getDoctorList());
+            patient.setDoctors(doctors);
         }
         return patient;
     }
@@ -106,6 +107,6 @@ public class PatientService {
     }
 
     public List<PatientDTO> getPatientByDoctorId(int id) {
-        return patientRepository.getPatientByDoctor_Id(id).stream().map(this::convertToDTO).toList();
+        return patientRepository.getPatientByDoctors_Id(id).stream().map(this::convertToDTO).toList();
     }
 }

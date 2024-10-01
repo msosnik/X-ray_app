@@ -26,7 +26,7 @@ public class PatientController {
             return ResponseEntity.notFound().build();
         }
     }
-    @GetMapping("/doctor/{id}")
+    @GetMapping("/by-doctor/{id}")
     public ResponseEntity<List<PatientDTO>> getPatientByDoctorId(@PathVariable int id) {
         try {
             return ResponseEntity.ok(patientService.getPatientByDoctorId(id));

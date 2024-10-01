@@ -28,7 +28,7 @@ public class Patient extends User {
     private List<XRayImage> xrayImages;
 
     @ManyToMany(mappedBy = "patients")
-    private List<Doctor> doctor;
+    private List<Doctor> doctors;
 
     private Role role = Role.PATIENT;
 

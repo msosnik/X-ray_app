@@ -1,5 +1,6 @@
 package com.backend.analysys;
 import com.backend.xRayImage.XRayImage;
+import com.backend.xRayImage.XRayImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -10,7 +11,14 @@ import java.util.stream.Collectors;
 public class AnalysisResultService {
 
     @Autowired
-    private AnalysisResultRepository analysisResultRepository;
+    private final AnalysisResultRepository analysisResultRepository;
+    @Autowired
+    private final XRayImageRepository xRayImageRepository;
+
+    public AnalysisResultService(AnalysisResultRepository analysisResultRepository, XRayImageRepository xRayImageRepository) {
+        this.analysisResultRepository = analysisResultRepository;
+        this.xRayImageRepository = xRayImageRepository;
+    }
 
     public List<AnalysisResultDTO> getAllAnalysisResults() {
         return analysisResultRepository.findAll().stream()
@@ -46,22 +54,23 @@ public class AnalysisResultService {
     }
 
     private AnalysisResultDTO convertToDTO(AnalysisResult result) {
-        AnalysisResultDTO dto = new AnalysisResultDTO();
-        dto.setId(result.getId());
-        dto.setXrayImageId(result.getXRayImage().getId());
-        dto.setAnalysisDate(result.getAnalysisDate());
-        dto.setDetectedAbnormalities(result.getDetectedAbnormalities());
-        dto.setDoctorReviewed(result.isDoctorReviewed());
-        dto.setDoctorComments(result.getDoctorComments());
-        return dto;
+        return new AnalysisResultDTO(
+                result.getId(),
+                result.getXRayImage().getId(),
+                result.getDetectedAbnormalities(),
+                result.getAnalysisDate(),
+                result.isDoctorReviewed(),
+                result.getDoctorComments()
+        );
     }
 
-    private AnalysisResult convertToEntity(AnalysisResultDTO dto, XRayImage image) {
-        AnalysisResult result = new AnalysisResult();
-        result.setId(dto.getId());
-        result.setXRayImage(image);
-        result.setAnalysisDate(dto.getAnalysisDate());
-        result.setDetectedAbnormalities(dto.getDetectedAbnormalities());
+    private AnalysisResult convertToEntity(AnalysisResultDTO dto) {
+        XRayImage image = xRayImageRepository.findById(dto.getXrayImageId()).orElseThrow();
+        AnalysisResult result = new AnalysisResult(
+                image,
+                dto.getDetectedAbnormalities(),
+                dto.getAnalysisDate()
+        );
         result.setDoctorReviewed(dto.isDoctorReviewed());
         result.setDoctorComments(dto.getDoctorComments());
         return result;

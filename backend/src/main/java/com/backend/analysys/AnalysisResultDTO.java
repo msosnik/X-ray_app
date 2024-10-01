@@ -5,10 +5,8 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class AnalysisResultDTO {
     private int id;
     private int xrayImageId;

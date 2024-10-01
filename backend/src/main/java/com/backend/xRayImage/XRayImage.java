@@ -19,16 +19,16 @@ public class XRayImage {
 
     @NonNull
     @Column(unique = true)
-    String imagePath;
+    private String imagePath;
 
     @NonNull
     @ManyToOne
-    Patient patient;
+    private Patient patient;
 
     @NonNull
-    LocalDate uploadDate;
+    private LocalDate uploadDate;
 
     @NonNull
-    String bodyPart;
+    private String bodyPart;
 
 }

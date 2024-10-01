@@ -1,5 +1,7 @@
 package com.backend;
 
+import com.backend.analysys.AnalysisResult;
+import com.backend.analysys.AnalysisResultRepository;
 import com.backend.patient.Patient;
 import com.backend.patient.PatientRepository;
 import com.backend.xRayImage.XRayImage;
@@ -8,16 +10,21 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final PatientRepository patientRepository;
     private final XRayImageRepository xRayImageRepository;
+    private final AnalysisResultRepository analysysResulrRepository;
 
-    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository) {
+    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysysResulrRepository) {
         this.patientRepository = patientRepository;
         this.xRayImageRepository = xRayImageRepository;
+        this.analysysResulrRepository = analysysResulrRepository;
     }
 
     @Override
@@ -37,5 +44,10 @@ public class DataInitializer implements CommandLineRunner {
         // Save XRay Images to the Repository
         xRayImageRepository.save(image1);
         xRayImageRepository.save(image2);
+
+        AnalysisResult result1 = new AnalysisResult(image1, Arrays.asList("broken rib 3", "no sternum"), LocalDate.now());
+        AnalysisResult result2 = new AnalysisResult(image2, Arrays.asList("broken long bone", "knee dislocation"), LocalDate.now());
+        List<AnalysisResult> resultList = Stream.of(result1, result2).toList();
+        analysysResulrRepository.saveAll(resultList);
     }
 }

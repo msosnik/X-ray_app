@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -28,7 +29,7 @@ public class Patient extends User {
     private List<XRayImage> xrayImages;
 
     @ManyToMany(mappedBy = "patients")
-    private List<Doctor> doctors;
+    private List<Doctor> doctors = new ArrayList<>();
 
     private Role role = Role.PATIENT;
 

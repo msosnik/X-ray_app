@@ -1,5 +1,6 @@
 package com.backend.patient;
 
+import com.backend.exception.ResourceNotFoundException;
 import com.backend.doctor.DoctorRepository;
 import com.backend.doctor.Doctor;
 import com.backend.xRayImage.XRayImage;
@@ -102,8 +103,14 @@ public class PatientService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
     }
 
-    public void deletePatient(int id) {
-        patientRepository.deleteById(id);
+    public void deletePatientById(int id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+
+        // This will remove the patient's association with any XRayImages if using orphan removal
+        patient.getXrayImages().clear();
+
+        patientRepository.delete(patient);
     }
 
     public List<PatientDTO> getPatientByDoctorId(int id) {

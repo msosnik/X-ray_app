@@ -43,6 +43,13 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.updateDoctor(id, doctorDTO));
     }
 
+    @PostMapping("/{doctorId}/patients/{patientId}")
+    public ResponseEntity<String> addPatientToDoctor(@PathVariable int doctorId, @PathVariable int patientId) {
+        doctorService.addPatientToDoctor(doctorId, patientId);
+        return ResponseEntity.ok("Patient added to doctor successfully.");
+    }
+
+
     // Delete doctor by ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDoctor(@PathVariable int id) {

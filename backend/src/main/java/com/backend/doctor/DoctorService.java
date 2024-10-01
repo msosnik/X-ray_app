@@ -1,10 +1,12 @@
 package com.backend.doctor;
 
+import com.backend.exception.ResourceNotFoundException;
 import com.backend.patient.Patient;
 import com.backend.patient.PatientRepository;
 import com.backend.user.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,5 +122,23 @@ public class DoctorService {
 
     public List<DoctorDTO> getDoctorsByPatientId(int patientId) {
         return doctorRepository.getDoctorByPatients_Id(patientId).stream().map(this::convertToDTO).toList();
+    }
+
+    public void addPatientToDoctor(int doctorId, int patientId) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with id: " + doctorId));
+
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
+
+        // Add patient to doctor's patient list
+        doctor.getPatients().add(patient);
+
+        // Add doctor to patient's doctor list (bidirectional)
+        patient.getDoctors().add(doctor);
+
+        // Save both doctor and patient
+        doctorRepository.save(doctor);
+        patientRepository.save(patient);
     }
 }

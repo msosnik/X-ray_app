@@ -26,7 +26,7 @@ public class Doctor extends User {
     private String availability;
     private String workingHours;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "doctor_patient", // Name of the join table
             joinColumns = @JoinColumn(name = "doctor_id"),

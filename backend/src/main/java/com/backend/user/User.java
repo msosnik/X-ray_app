@@ -36,5 +36,5 @@ public abstract class User {
     @NonNull
     private LocalDate createdAt;
 
-    private LocalDate updatedAt;
+    private LocalDate updatedAt = createdAt;
 }

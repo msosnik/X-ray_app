@@ -30,8 +30,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Create Patients
-        Patient patient1 = new Patient("john.doe@example.com", "password", "John", "Doe", LocalDate.now(), LocalDate.now(), LocalDate.of(1990, 1, 1), "123 Main St, Anytown, USA", 1234567890 );
-        Patient patient2 = new Patient("jane.smith@example.com", "password", "Jane", "Smith", LocalDate.now(), LocalDate.now(), LocalDate.of(2000, 1, 1), "Grodzka 1 Kraków", 111111111);
+        Patient patient1 = new Patient("john.doe@example.com", "password", "John", "Doe", LocalDate.now(), LocalDate.of(1990, 1, 1), "123 Main St, Anytown, USA", 1234567890 );
+        Patient patient2 = new Patient("jane.smith@example.com", "password", "Jane", "Smith", LocalDate.now(), LocalDate.of(2000, 1, 1), "Grodzka 1, Kraków", 111111111);
 
         // Save Patients to the Repository
         patientRepository.save(patient1);

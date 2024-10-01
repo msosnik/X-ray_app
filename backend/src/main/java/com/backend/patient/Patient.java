@@ -21,6 +21,7 @@ public class Patient extends User {
     private LocalDate dateOfBirth;
     @NonNull
     private String address;
+    @Column(unique = true)
     private int phoneNumber;
     private boolean consentToUseImages = false;
     @OneToMany
@@ -29,13 +30,19 @@ public class Patient extends User {
     @ManyToMany(mappedBy = "patients")
     private List<Doctor> doctor;
 
-    public Patient(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, LocalDate updatedAt, @NonNull LocalDate dateOfBirth, @NonNull String adress, int phoneNumber) {
-        super(email, passwordHash, firstName, lastName, createdAt); // Call User constructor
-        this.setRole(Role.PATIENT); // Set the role to Patient
-        this.setUpdatedAt(updatedAt); // Set the updated date
+    private Role role = Role.PATIENT;
+
+    public Patient(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, LocalDate dateOfBirth, String address, int phoneNumber) {
+        super(email, passwordHash, firstName, lastName, createdAt);
         this.dateOfBirth = dateOfBirth;
-        this.address = adress;
-        this.consentToUseImages =false;
+        this.address = address;
         this.phoneNumber = phoneNumber;
     }
+//    public Patient(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, LocalDate updatedAt, @NonNull LocalDate dateOfBirth, @NonNull String adress, int phoneNumber) {
+//        super(email, passwordHash, firstName, lastName, createdAt); // Call User constructor
+//        this.setUpdatedAt(updatedAt); // Set the updated date
+//        this.dateOfBirth = dateOfBirth;
+//        this.address = adress;
+//        this.consentToUseImages =false;
+//    }
 }

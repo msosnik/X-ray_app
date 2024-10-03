@@ -3,10 +3,11 @@ package com.backend.doctor;
 import com.backend.exception.ResourceNotFoundException;
 import com.backend.patient.Patient;
 import com.backend.patient.PatientRepository;
+import com.backend.user.EmailValidator;
+import com.backend.user.PasswordUtil;
 import com.backend.user.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,8 @@ public class DoctorService {
 
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private PasswordUtil passwordUtil;
 
     // Convert Doctor entity to DoctorDTO
     public DoctorDTO convertToDTO(Doctor doctor) {
@@ -73,6 +76,26 @@ public class DoctorService {
         return doctor;
     }
 
+    public void validate(DoctorDTO doctorDto) {
+        if (doctorDto.getFirstName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Doctors first name cannot be empty");
+        }
+        for (char letter : doctorDto.getFirstName().toCharArray()) {
+            if (!Character.isLetter(letter) && letter != ' ') {
+                throw new IllegalArgumentException("Doctors first name must consists only of letters or spaces");
+            }
+        }
+        if (doctorDto.getLastName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Doctors second name cannot be empty");
+        }
+        for (char letter : doctorDto.getLastName().toCharArray()) {
+            if (!Character.isLetter(letter) && letter != ' ') {
+                throw new IllegalArgumentException("Doctors second name must consists only of letters or spaces");
+            }
+        }
+        EmailValidator.validate(doctorDto.getEmail());
+    }
+
     // Method to get all doctors
     public List<DoctorDTO> getAllDoctors() {
         return doctorRepository.findAll().stream()
@@ -89,6 +112,9 @@ public class DoctorService {
 
     // Method to create a new doctor
     public DoctorDTO createDoctor(DoctorDTO doctorDTO) {
+        validate(doctorDTO);
+        String hashedPassword = passwordUtil.hashPassword(doctorDTO.getPasswordHash());
+        doctorDTO.setPasswordHash(hashedPassword);
         Doctor doctor = convertToEntity(doctorDTO);
         return convertToDTO(doctorRepository.save(doctor));
     }
@@ -106,7 +132,7 @@ public class DoctorService {
                     doctor.setAvailability(updatedDoctorDTO.getAvailability());
                     doctor.setWorkingHours(updatedDoctorDTO.getWorkingHours());
 
-                    // Update patients list
+                    // Update Doctors list
                     List<Patient> patients = patientRepository.findAllById(updatedDoctorDTO.getPatientIds());
                     doctor.setPatients(patients);
 

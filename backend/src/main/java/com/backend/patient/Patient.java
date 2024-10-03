@@ -25,7 +25,7 @@ public class Patient extends User {
     @Column(unique = true)
     private int phoneNumber;
     private boolean consentToUseImages = false;
-    @OneToMany
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<XRayImage> xrayImages;
 
     @ManyToMany(mappedBy = "patients")
@@ -39,11 +39,4 @@ public class Patient extends User {
         this.address = address;
         this.phoneNumber = phoneNumber;
     }
-//    public Patient(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, LocalDate updatedAt, @NonNull LocalDate dateOfBirth, @NonNull String adress, int phoneNumber) {
-//        super(email, passwordHash, firstName, lastName, createdAt); // Call User constructor
-//        this.setUpdatedAt(updatedAt); // Set the updated date
-//        this.dateOfBirth = dateOfBirth;
-//        this.address = adress;
-//        this.consentToUseImages =false;
-//    }
 }

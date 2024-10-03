@@ -23,6 +23,7 @@ public class XRayImage {
 
     @NonNull
     @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
     @NonNull

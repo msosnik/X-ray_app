@@ -3,6 +3,8 @@ package com.backend.patient;
 import com.backend.exception.ResourceNotFoundException;
 import com.backend.doctor.DoctorRepository;
 import com.backend.doctor.Doctor;
+import com.backend.user.EmailValidator;
+import com.backend.user.PasswordUtil;
 import com.backend.xRayImage.XRayImage;
 import com.backend.xRayImage.XRayImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ public class PatientService {
     private XRayImageRepository xRayImageRepository;
     @Autowired
     private DoctorRepository doctorRepository;
+    @Autowired
+    private PasswordUtil passwordUtil;
 
     // Convert Patient entity to PatientDTO
     public PatientDTO convertToDTO(Patient patient) {
@@ -72,6 +76,26 @@ public class PatientService {
         return patient;
     }
 
+    public void validate(PatientDTO patientDto) {
+        if (patientDto.getFirstName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Patients first name cannot be empty");
+        }
+        for (char letter : patientDto.getFirstName().toCharArray()) {
+            if (!Character.isLetter(letter) && letter != ' ') {
+                throw new IllegalArgumentException("Patients first name must consists only of letters or spaces");
+            }
+        }
+        if (patientDto.getLastName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Patients second name cannot be empty");
+        }
+        for (char letter : patientDto.getLastName().toCharArray()) {
+            if (!Character.isLetter(letter) && letter != ' ') {
+                throw new IllegalArgumentException("Patients second name must consists only of letters or spaces");
+            }
+        }
+        EmailValidator.validate(patientDto.getEmail());
+    }
+
     public List<PatientDTO> getAllPatients() {
         return patientRepository.findAll().stream()
                 .map(this::convertToDTO)
@@ -85,6 +109,9 @@ public class PatientService {
     }
 
     public PatientDTO createPatient(PatientDTO patientDTO) {
+
+        String hashedPassword = passwordUtil.hashPassword(patientDTO.getPasswordHash());
+        patientDTO.setPasswordHash(hashedPassword);
         Patient patient = convertToEntity(patientDTO);
         return convertToDTO(patientRepository.save(patient));
     }

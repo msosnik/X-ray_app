@@ -1,0 +1,401 @@
+/* General body styling */
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #FEFEFF 0%, #E8DEF8 100%);
+    min-width: 100vw;
+    min-height: 100vh;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Main dashboard container */
+.dashboard-container {
+    position: absolute;
+    width: 90vw;
+    height: 84vh; /* Slightly reduced height to create gap at the top */
+    left: 5vw;
+    top: 9vh; /* Moved slightly lower to create gap at the top */
+    background: linear-gradient(180deg, #E8DEF8 12.36%, #FFFFFF 100%);
+    box-shadow: 7px 7px 20px 3px #E8DEF8;
+    border-radius: 30px;
+    z-index: 1;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Welcome message */
+.welcome-message {
+    position: absolute;
+    top: 2vh;
+    left: 5vw;
+    z-index: 2;
+    font-family: 'Roboto', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 2.5vw;
+    line-height: 3vh;
+    color: #65558F;
+}
+
+/* Tab description */
+.tab-description {
+    position: absolute;
+    top: 8vh;
+    left: 5vw;
+    z-index: 2;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.2vw;
+    line-height: 2.5vh;
+    color: #65558F;
+    width: 80vw;
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.tab-description ul {
+    padding-left: 20px;
+}
+
+.tab-description li {
+    margin-bottom: 10px;
+}
+
+/* Header container for Profile and Logout buttons */
+.header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px;
+    background-color: transparent;
+    z-index: 3;
+    position: absolute;
+    top: 1vh; /* Moved slightly higher */
+    right: 1vw;
+    width: auto;
+}
+
+/* Common button styles for header buttons */
+.header button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 24px; /* Adjusted padding */
+    margin-left: 15px; /* Increased space between buttons */
+    width: 12vw; /* Increased width */
+    height: 6vh; /* Slightly reduced height */
+    border-radius: 100px;
+    font-size: 1.2vw; /* Adjusted font size */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.header button:hover {
+    transform: scale(1.05);
+}
+
+/* Profile button */
+#profileBtn {
+    background: #E8DEF8;
+    color: #4A4459;
+}
+
+/* Logout button */
+#logoutBtn {
+    background: #65558F;
+    color: #FFFFFF;
+}
+
+/* Tabs container */
+.tabs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 2vh; /* Moved higher */
+    left: 2vw;
+    width: 86vw;
+    height: 12vh; /* Reduced height */
+    gap: 1.5vw;
+    z-index: 2;
+}
+
+/* FAB button styling */
+.fab-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 12px; /* Reduced padding */
+    width: 22vw;
+    height: 10vh; /* Reduced height */
+    border-radius: 20px; /* Slightly reduced border radius */
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.6vw; /* Slightly reduced font size */
+    line-height: 2.5vh;
+    color: #FFFFFF;
+    cursor: pointer;
+    background: #D6BCFF;
+    border: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.fab-button:hover {
+    transform: scale(1.05);
+}
+
+.fab-button svg {
+    margin-right: 12px; /* Increased margin for better spacing */
+    width: 2.5vw; /* Set width of icon */
+    height: 2.5vw; /* Set height of icon */
+}
+
+.fab-button svg,
+#profileBtn svg,
+#logoutBtn svg {
+    margin-right: 8px;
+}
+
+/* Active tab button */
+.fab-button.active {
+    background: #65558F;
+}
+
+/* Tab content styling */
+#tabContent {
+    position: absolute;
+    top: 16vh; /* Adjusted to account for higher button placement */
+    left: 5vw;
+    width: 80vw;
+    height: 59vh; /* Increased to use more vertical space */
+    overflow-y: auto;
+    color: #65558F;
+    z-index: 2;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Appointments list styling */
+.appointments-list {
+    margin-bottom: 20px;
+}
+
+.appointment-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;  /* Three columns: doctor, date (center), buttons (right) */
+    align-items: center;  /* Vertically center content */
+    background-color: #f0e6ff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.appointment-item > div {
+    text-align: left;  /* Default alignment */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.appointment-item .date-time {
+    text-align: center;  /* Center the date and time */
+}
+
+.appointment-actions {
+    display: flex;
+    justify-content: flex-end;  /* Right align the buttons */
+    gap: 10px;  /* Add some space between the buttons */
+}
+
+.appointment-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #65558F;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.appointment-actions button:hover {
+    background-color: #4A4459;
+}
+
+/* Create New Appointment Request button */
+.create-appointment button {
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.2vw;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-appointment button:hover {
+    background-color: #4A4459;
+}
+
+/* Upload X-Ray styling */
+.upload-xray {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.body-part-selection {
+    margin-bottom: 20px;
+}
+
+/* Body part dropdown button */
+#bodyPart {
+    padding: 10px;
+    font-size: 1vw;
+    border-radius: 10px;
+    border: 1px solid #65558F;
+    background-color: white;
+    color: #65558F;
+    cursor: pointer;
+}
+
+.xray-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.xray-section {
+    width: 45%;
+    position: relative;
+}
+
+.xray-image {
+    height: 300px;
+    border: 1px solid #65558F;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+/* Upload Image (PNG) button */
+#uploadBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -0%);
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.2vw;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#uploadBtn:hover {
+    background-color: #4A4459;
+}
+
+/* Messages styling */
+.messages-container {
+    display: flex;
+    height: 100%;
+}
+
+.doctors-list {
+    width: 30%;
+    border-right: 1px solid #65558F;
+    padding-right: 20px;
+}
+
+.doctor-item {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.doctor-item:hover, .doctor-item.active {
+    background-color: #f0e6ff;
+}
+
+/* Create Chat button */
+.create-chat-btn {
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.2vw;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.create-chat-btn:hover {
+    background-color: #4A4459;
+}
+
+.chat-area {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background-color: #f0e6ff;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.chat-input {
+    display: flex;
+    padding: 10px;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    margin-right: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #65558F;
+    font-size: 1vw;
+}
+
+/* Send button */
+#sendMessageBtn {
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.2vw;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#sendMessageBtn:hover {
+    background-color: #4A4459;
+}
+
+/* Hover effects for all buttons */
+button:hover {
+    opacity: 0.9;
+}
+
+.doctor-item {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.doctor-item:hover, .doctor-item.active {
+    background-color: #f0e6ff;  /* Highlight selected doctor */
+}

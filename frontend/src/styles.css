@@ -14,9 +14,9 @@ body {
 .dashboard-container {
     position: absolute;
     width: 90vw;
-    height: 80vh;
+    height: 84vh; /* Slightly reduced height to create gap at the top */
     left: 5vw;
-    top: 10vh;
+    top: 9vh; /* Moved slightly lower to create gap at the top */
     background: linear-gradient(180deg, #E8DEF8 12.36%, #FFFFFF 100%);
     box-shadow: 7px 7px 20px 3px #E8DEF8;
     border-radius: 30px;
@@ -72,23 +72,28 @@ body {
     background-color: transparent;
     z-index: 3;
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 1vh; /* Moved slightly higher */
+    right: 1vw;
     width: auto;
 }
 
-/* Common button styles */
+/* Common button styles for header buttons */
 .header button {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px 24px;
-    margin-left: 10px;
-    width: auto;
-    height: 7vh;
+    padding: 8px 24px; /* Adjusted padding */
+    margin-left: 15px; /* Increased space between buttons */
+    width: 12vw; /* Increased width */
+    height: 6vh; /* Slightly reduced height */
     border-radius: 100px;
-    font-size: 1.5vw;
+    font-size: 1.2vw; /* Adjusted font size */
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.header button:hover {
+    transform: scale(1.05);
 }
 
 /* Profile button */
@@ -109,10 +114,11 @@ body {
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 5vh;
-    width: 90vw;
-    height: 10vh;           /* Set a fixed height to ensure vertical alignment */
-    gap: 1vw;
+    top: 2vh; /* Moved higher */
+    left: 2vw;
+    width: 86vw;
+    height: 12vh; /* Reduced height */
+    gap: 1.5vw;
     z-index: 2;
 }
 
@@ -121,19 +127,34 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 12px 16px;
-    gap: 8px;
-    width: 18vw;
-    height: 8vh;
-    border-radius: 20px;
+    padding: 8px 12px; /* Reduced padding */
+    width: 22vw;
+    height: 10vh; /* Reduced height */
+    border-radius: 20px; /* Slightly reduced border radius */
     font-family: 'Roboto', sans-serif;
-    font-size: 1.5vw;
-    line-height: 3vh;
+    font-size: 1.6vw; /* Slightly reduced font size */
+    line-height: 2.5vh;
     color: #FFFFFF;
     cursor: pointer;
     background: #D6BCFF;
     border: none;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.fab-button:hover {
+    transform: scale(1.05);
+}
+
+.fab-button svg {
+    margin-right: 12px; /* Increased margin for better spacing */
+    width: 2.5vw; /* Set width of icon */
+    height: 2.5vw; /* Set height of icon */
+}
+
+.fab-button svg,
+#profileBtn svg,
+#logoutBtn svg {
+    margin-right: 8px;
 }
 
 /* Active tab button */
@@ -144,10 +165,10 @@ body {
 /* Tab content styling */
 #tabContent {
     position: absolute;
-    top: 25vh;
+    top: 16vh; /* Adjusted to account for higher button placement */
     left: 5vw;
     width: 80vw;
-    height: 50vh;
+    height: 59vh; /* Increased to use more vertical space */
     overflow-y: auto;
     color: #65558F;
     z-index: 2;
@@ -161,24 +182,34 @@ body {
 }
 
 .appointment-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;  /* Three columns: doctor, date (center), buttons (right) */
+    align-items: center;  /* Vertically center content */
     background-color: #f0e6ff;
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 10px;
-    align-items: center;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
 }
 
 .appointment-item > div {
+    text-align: left;  /* Default alignment */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+.appointment-item .date-time {
+    text-align: center;  /* Center the date and time */
+}
+
+.appointment-actions {
+    display: flex;
+    justify-content: flex-end;  /* Right align the buttons */
+    gap: 10px;  /* Add some space between the buttons */
+}
+
 .appointment-actions button {
-    margin-left: 10px;
     padding: 5px 10px;
     border: none;
     border-radius: 5px;
@@ -357,4 +388,14 @@ body {
 /* Hover effects for all buttons */
 button:hover {
     opacity: 0.9;
+}
+
+.doctor-item {
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.doctor-item:hover, .doctor-item.active {
+    background-color: #f0e6ff;  /* Highlight selected doctor */
 }

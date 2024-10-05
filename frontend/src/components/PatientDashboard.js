@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import '../styles.css';  // Ensure to import your CSS styles
-
+import '../styles.css';  // Import your styles
+import { Home, Calendar, Upload, MessageSquare, User, LogOut } from 'lucide-react';
 const PatientDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
   const [activeTab, setActiveTab] = useState('home');
+  const [activeDoctor, setActiveDoctor] = useState(null);  // Track the selected doctor
 
   // Simulating user data
   const userData = {
@@ -34,20 +35,8 @@ const PatientDashboard = () => {
     2: [
       { sender: "Dr. Michael Johnson", message: "Your test results are back. Everything looks normal." },
       { sender: "You", message: "That's great news, thank you!" }
-    ]
-  };
-
-  // Appointment Actions
-  const editAppointment = (doctor, date, time) => {
-    alert(`Edit appointment with ${doctor} on ${date} at ${time}`);
-  };
-
-  const deleteAppointment = (doctor, date, time) => {
-    alert(`Delete appointment with ${doctor} on ${date} at ${time}`);
-  };
-
-  const createAppointment = () => {
-    alert('Create new appointment request');
+    ],
+    // Add more messages if needed for other doctors
   };
 
   const showHomeTab = () => (
@@ -69,19 +58,20 @@ const PatientDashboard = () => {
         {appointments.map(app => (
           <div className="appointment-item" key={app.doctor + app.date}>
             <div>{app.doctor}</div>
-            <div>{app.date} {app.time}</div>
+            <div className="date-time">{app.date} {app.time}</div>
             <div className="appointment-actions">
-              <button onClick={() => editAppointment(app.doctor, app.date, app.time)}>Edit</button>
-              <button onClick={() => deleteAppointment(app.doctor, app.date, app.time)}>Delete</button>
+              <button>Edit</button>
+              <button>Delete</button>
             </div>
           </div>
         ))}
       </div>
       <div className="create-appointment">
-        <button onClick={createAppointment}>Create New Appointment Request</button>
+        <button>Create New Appointment Request</button>
       </div>
     </div>
   );
+  
 
   const showUploadXRayTab = () => (
     <div className="upload-xray">
@@ -115,13 +105,27 @@ const PatientDashboard = () => {
       <div className="doctors-list">
         <button className="create-chat-btn" onClick={() => alert("Create new chat clicked!")}>+ Create Chat</button>
         {doctors.map(doctor => (
-          <div className="doctor-item" key={doctor.id}>
+          <div
+            className={`doctor-item ${activeDoctor === doctor.id ? 'active' : ''}`}  // Highlight the selected doctor
+            key={doctor.id}
+            onClick={() => setActiveDoctor(doctor.id)}  // Set the active doctor on click
+          >
             {doctor.name}
           </div>
         ))}
       </div>
       <div className="chat-area">
-        <div className="chat-messages" id="chatMessages"></div>
+        <div className="chat-messages" id="chatMessages">
+          {activeDoctor && chatMessages[activeDoctor] ? (
+            chatMessages[activeDoctor].map((msg, index) => (
+              <div key={index}>
+                <strong>{msg.sender}:</strong> {msg.message}
+              </div>
+            ))
+          ) : (
+            <div>Select a doctor to view the chat.</div>
+          )}
+        </div>
         <div className="chat-input">
           <input type="text" id="messageInput" placeholder="Type your message..." />
           <button id="sendMessageBtn" onClick={() => alert("Send message clicked!")}>Send</button>
@@ -145,12 +149,20 @@ const PatientDashboard = () => {
     }
   };
 
+
+
   return (
     <>
       {/* Header with Profile and Logout buttons */}
       <div className="header">
-        <button id="profileBtn">Profile</button>
-        <button id="logoutBtn">Logout</button>
+        <button id="profileBtn">
+          <User size={20} />
+          Profile
+        </button>
+        <button id="logoutBtn">
+          <LogOut size={20} />
+          Logout
+        </button>
       </div>
 
       {/* Main dashboard container */}
@@ -165,21 +177,25 @@ const PatientDashboard = () => {
           <button
             className={`fab-button ${activeTab === 'home' ? 'active' : ''}`}
             onClick={() => { setTabContent('home'); setActiveTab('home'); }}>
+            <Home size={28} />
             Home
           </button>
           <button
             className={`fab-button ${activeTab === 'appointments' ? 'active' : ''}`}
             onClick={() => { setTabContent('appointments'); setActiveTab('appointments'); }}>
+            <Calendar size={28} />
             Appointments
           </button>
           <button
             className={`fab-button ${activeTab === 'upload' ? 'active' : ''}`}
             onClick={() => { setTabContent('upload'); setActiveTab('upload'); }}>
+            <Upload size={28} />
             Upload X-Ray
           </button>
           <button
             className={`fab-button ${activeTab === 'messages' ? 'active' : ''}`}
             onClick={() => { setTabContent('messages'); setActiveTab('messages'); }}>
+            <MessageSquare size={28} />
             Messages
           </button>
         </div>

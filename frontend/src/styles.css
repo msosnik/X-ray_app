@@ -14,9 +14,9 @@ body {
 .dashboard-container {
     position: absolute;
     width: 90vw;
-    height: 84vh; /* Slightly reduced height to create gap at the top */
+    height: 84vh;
     left: 5vw;
-    top: 9vh; /* Moved slightly lower to create gap at the top */
+    top: 9vh;
     background: linear-gradient(180deg, #E8DEF8 12.36%, #FFFFFF 100%);
     box-shadow: 7px 7px 20px 3px #E8DEF8;
     border-radius: 30px;
@@ -27,40 +27,38 @@ body {
 
 /* Welcome message */
 .welcome-message {
-    position: absolute;
-    top: 2vh;
-    left: 5vw;
-    z-index: 2;
     font-family: 'Roboto', sans-serif;
     font-style: normal;
     font-weight: 400;
     font-size: 2.5vw;
     line-height: 3vh;
     color: #65558F;
+    text-align: center;
+    margin-bottom: 40px;
 }
+
 
 /* Tab description */
 .tab-description {
-    position: absolute;
-    top: 8vh;
-    left: 5vw;
-    z-index: 2;
     font-family: 'Roboto', sans-serif;
     font-size: 1.2vw;
     line-height: 2.5vh;
     color: #65558F;
-    width: 80vw;
-    max-height: 60vh;
+    width: 80%;
+    max-width: 812px;
+    margin: 0 auto;
     overflow-y: auto;
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-x: hidden;
 }
 
 .tab-description ul {
-    padding-left: 20px;
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
 }
 
 .tab-description li {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 /* Header container for Profile and Logout buttons */
@@ -72,40 +70,60 @@ body {
     background-color: transparent;
     z-index: 3;
     position: absolute;
-    top: 1vh; /* Moved slightly higher */
+    top: 1vh;
     right: 1vw;
     width: auto;
 }
 
-/* Common button styles for header buttons */
-.header button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 24px; /* Adjusted padding */
-    margin-left: 15px; /* Increased space between buttons */
-    width: 12vw; /* Increased width */
-    height: 6vh; /* Slightly reduced height */
-    border-radius: 100px;
-    font-size: 1.2vw; /* Adjusted font size */
+/* Common button styles */
+button {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.header button:hover {
+button:hover {
     transform: scale(1.05);
 }
 
-/* Profile button */
+button:active {
+    transform: scale(0.95);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Header button styles */
+.header button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 24px;
+    margin-left: 15px;
+    width: 12vw;
+    height: 6vh;
+    border-radius: 100px;
+    font-size: 1.2vw;
+    border: none;
+}
+
 #profileBtn {
     background: #E8DEF8;
     color: #4A4459;
 }
 
-/* Logout button */
+#profileBtn:hover {
+    background: #D6BCFF;
+}
+
 #logoutBtn {
     background: #65558F;
     color: #FFFFFF;
+}
+
+#logoutBtn:hover {
+    background: #4A4459;
 }
 
 /* Tabs container */
@@ -114,10 +132,10 @@ body {
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 2vh; /* Moved higher */
+    top: 2vh;
     left: 2vw;
     width: 86vw;
-    height: 12vh; /* Reduced height */
+    height: 12vh;
     gap: 1.5vw;
     z-index: 2;
 }
@@ -127,28 +145,26 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 8px 12px; /* Reduced padding */
+    padding: 8px 12px;
     width: 22vw;
-    height: 10vh; /* Reduced height */
-    border-radius: 20px; /* Slightly reduced border radius */
+    height: 10vh;
+    border-radius: 20px;
     font-family: 'Roboto', sans-serif;
-    font-size: 1.6vw; /* Slightly reduced font size */
+    font-size: 1.6vw;
     line-height: 2.5vh;
     color: #FFFFFF;
-    cursor: pointer;
     background: #D6BCFF;
     border: none;
-    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .fab-button:hover {
-    transform: scale(1.05);
+    background: #65558F;
 }
 
 .fab-button svg {
-    margin-right: 12px; /* Increased margin for better spacing */
-    width: 2.5vw; /* Set width of icon */
-    height: 2.5vw; /* Set height of icon */
+    margin-right: 12px;
+    width: 2.5vw;
+    height: 2.5vw;
 }
 
 .fab-button svg,
@@ -162,18 +178,74 @@ body {
     background: #65558F;
 }
 
-/* Tab content styling */
+/* General tab content styling (unchanged) */
 #tabContent {
     position: absolute;
-    top: 16vh; /* Adjusted to account for higher button placement */
+    top: 16vh;
     left: 5vw;
     width: 80vw;
-    height: 59vh; /* Increased to use more vertical space */
+    height: 59vh;
     overflow-y: auto;
     color: #65558F;
     z-index: 2;
     padding: 20px;
     box-sizing: border-box;
+}
+
+/* Home tab specific styling */
+.home-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding-top: 5vh;
+}
+
+.home-content .welcome-message {
+    font-size: 45px;
+    line-height: 52px;
+}
+
+.welcome-message {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 45px;
+    line-height: 52px;
+    color: #65558F;
+    text-align: center;
+    margin-bottom: 40px; /* Add some space between welcome message and bullet points */
+}
+
+.home-content .tab-description {
+    font-size: 36px;
+    line-height: 44px;
+}
+
+.home-content .tab-description ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+}
+
+.home-content .tab-description li {
+    margin-bottom: 20px;
+}
+
+.tab-description ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: left; /* Align text to the left within the centered block */
+}
+
+.tab-description ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.tab-description li {
+    margin-bottom: 20px; /* Add some space between list items */
 }
 
 /* Appointments list styling */
@@ -183,8 +255,8 @@ body {
 
 .appointment-item {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;  /* Three columns: doctor, date (center), buttons (right) */
-    align-items: center;  /* Vertically center content */
+    grid-template-columns: 1fr 1fr auto;
+    align-items: center;
     background-color: #f0e6ff;
     border-radius: 10px;
     padding: 15px;
@@ -193,30 +265,29 @@ body {
 }
 
 .appointment-item > div {
-    text-align: left;  /* Default alignment */
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .appointment-item .date-time {
-    text-align: center;  /* Center the date and time */
+    text-align: center;
 }
 
 .appointment-actions {
     display: flex;
-    justify-content: flex-end;  /* Right align the buttons */
-    gap: 10px;  /* Add some space between the buttons */
+    justify-content: flex-end;
+    gap: 10px;
 }
 
+/* Appointment action button styles */
 .appointment-actions button {
     padding: 5px 10px;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
     background-color: #65558F;
     color: white;
-    transition: background-color 0.3s ease;
 }
 
 .appointment-actions button:hover {
@@ -231,12 +302,14 @@ body {
     padding: 10px 20px;
     border-radius: 20px;
     font-size: 1.2vw;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 .create-appointment button:hover {
     background-color: #4A4459;
+}
+
+.create-appointment button:disabled {
+    background-color: #9e9e9e;
 }
 
 /* Upload X-Ray styling */
@@ -293,8 +366,6 @@ body {
     padding: 10px 20px;
     border-radius: 20px;
     font-size: 1.2vw;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 #uploadBtn:hover {
@@ -331,9 +402,7 @@ body {
     padding: 10px 20px;
     border-radius: 20px;
     font-size: 1.2vw;
-    cursor: pointer;
     margin-bottom: 10px;
-    transition: background-color 0.3s ease;
 }
 
 .create-chat-btn:hover {
@@ -377,25 +446,8 @@ body {
     padding: 10px 20px;
     border-radius: 20px;
     font-size: 1.2vw;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 #sendMessageBtn:hover {
     background-color: #4A4459;
-}
-
-/* Hover effects for all buttons */
-button:hover {
-    opacity: 0.9;
-}
-
-.doctor-item {
-    padding: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.doctor-item:hover, .doctor-item.active {
-    background-color: #f0e6ff;  /* Highlight selected doctor */
 }

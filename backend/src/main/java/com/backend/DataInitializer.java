@@ -2,6 +2,9 @@ package com.backend;
 
 import com.backend.analysys.AnalysisResult;
 import com.backend.analysys.AnalysisResultRepository;
+import com.backend.appointment.Appointment;
+import com.backend.appointment.AppointmentRepository;
+import com.backend.appointment.Status;
 import com.backend.doctor.Doctor;
 import com.backend.doctor.DoctorRepository;
 import com.backend.patient.Patient;
@@ -13,6 +16,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -24,13 +28,15 @@ public class DataInitializer implements CommandLineRunner {
     private final XRayImageRepository xRayImageRepository;
     private final AnalysisResultRepository analysysResulrRepository;
     private final DoctorRepository doctorRepository;
+    private final AppointmentRepository appointmentRepository;
     private final PasswordUtil passwordUtil;
 
-    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysysResulrRepository, DoctorRepository doctorRepository, PasswordUtil passwordUtil) {
+    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysysResulrRepository, DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil) {
         this.patientRepository = patientRepository;
         this.xRayImageRepository = xRayImageRepository;
         this.analysysResulrRepository = analysysResulrRepository;
         this.doctorRepository = doctorRepository;
+        this.appointmentRepository = appointmentRepository;
         this.passwordUtil = passwordUtil;
     }
 
@@ -68,5 +74,11 @@ public class DataInitializer implements CommandLineRunner {
         patient2.setDoctors(doctorList);
         patientRepository.saveAll(patientList);
         doctorRepository.saveAll(doctorList);
+
+        Appointment appointment1 = new Appointment(patient1, doctor1, LocalDateTime.now().plusDays(1), Status.SCHEDULED, LocalDate.now());
+        Appointment appointment2 = new Appointment(patient1, doctor2, LocalDateTime.now().plusDays(3), Status.CANCELLED, LocalDate.now());
+
+        appointmentRepository.save(appointment1);
+        appointmentRepository.save(appointment2);
     }
 }

@@ -5,6 +5,7 @@ const PatientDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
   const [activeTab, setActiveTab] = useState('home');
   const [activeDoctor, setActiveDoctor] = useState(null);  // Track the selected doctor
+  const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
 
   // Simulating user data
   const userData = {
@@ -13,11 +14,11 @@ const PatientDashboard = () => {
   };
 
   // Simulating appointments data
-  const appointments = [
-    { doctor: "Dr. Jane Smith", date: "2024-10-05", time: "14:00" },
-    { doctor: "Dr. Michael Johnson", date: "2024-10-10", time: "10:30" },
-    { doctor: "Dr. Emily Brown", date: "2024-10-15", time: "16:15" }
-  ];
+  const [appointments, setAppointments] = useState([
+    { id: 1, doctor: "Dr. Jane Smith", date: "2024-10-05", time: "14:00" },
+    { id: 2, doctor: "Dr. Michael Johnson", date: "2024-10-10", time: "10:30" },
+    { id: 3, doctor: "Dr. Emily Brown", date: "2024-10-15", time: "16:15" }
+  ]);
 
   const doctors = [
     { id: 1, name: "Dr. Jane Smith" },
@@ -40,34 +41,67 @@ const PatientDashboard = () => {
   };
 
   const showHomeTab = () => (
-    <div>
-      <div className="welcome-message">Welcome {userData.firstName} {userData.lastName}</div>
+    <div className="home-content">
+      <div className="welcome-message">Welcome {userData.firstName} {userData.lastName} !</div>
       <div className="tab-description">
         <ul>
-          <li><strong>Appointments:</strong> Plan, edit and cancel appointments</li>
-          <li><strong>Upload X-Ray:</strong> Upload images to analyze</li>
-          <li><strong>Messages:</strong> Chat with your doctor</li>
+          <li>- Appointments: plan, edit and cancel appointments</li>
+          <li>- Upload X-Ray: Upload images to analyze</li>
+          <li>- Messages: Chat with your doctor</li>
         </ul>
       </div>
     </div>
   );
 
+
+  const handleEditAppointment = (id) => {
+    // In a real app, this would open an edit form or modal
+    alert(`Editing appointment with ID: ${id}`);
+  };
+
+  const handleDeleteAppointment = (id) => {
+    // In a real app, you'd want to show a confirmation dialog before deleting
+    setAppointments(appointments.filter(app => app.id !== id));
+    alert(`Appointment with ID: ${id} has been deleted`);
+  };
+
+  const handleProfileClick = () => {
+    // In a real app, this would navigate to the profile page or open a profile modal
+    alert("Opening profile...");
+  };
+
+  const handleLogout = () => {
+    // In a real app, this would handle the logout process
+    alert("Logging out...");
+  };
+
   const showAppointmentsTab = () => (
     <div>
       <div className="appointments-list">
         {appointments.map(app => (
-          <div className="appointment-item" key={app.doctor + app.date}>
+          <div className="appointment-item" key={app.id}>
             <div>{app.doctor}</div>
             <div className="date-time">{app.date} {app.time}</div>
             <div className="appointment-actions">
-              <button>Edit</button>
-              <button>Delete</button>
+              <button onClick={() => handleEditAppointment(app.id)}>Edit</button>
+              <button onClick={() => handleDeleteAppointment(app.id)}>Delete</button>
             </div>
           </div>
         ))}
       </div>
       <div className="create-appointment">
-        <button>Create New Appointment Request</button>
+        <button 
+          onClick={() => {
+            setIsCreatingAppointment(true);
+            // Here you would typically open a modal or navigate to a form
+            alert("Opening appointment request form...");
+            // Simulating an async operation
+            setTimeout(() => setIsCreatingAppointment(false), 2000);
+          }}
+          disabled={isCreatingAppointment}
+        >
+          {isCreatingAppointment ? "Processing..." : "Create New Appointment Request"}
+        </button>
       </div>
     </div>
   );
@@ -155,11 +189,11 @@ const PatientDashboard = () => {
     <>
       {/* Header with Profile and Logout buttons */}
       <div className="header">
-        <button id="profileBtn">
+        <button id="profileBtn" onClick={handleProfileClick}>
           <User size={20} />
           Profile
         </button>
-        <button id="logoutBtn">
+        <button id="logoutBtn" onClick={handleLogout}>
           <LogOut size={20} />
           Logout
         </button>
@@ -203,5 +237,6 @@ const PatientDashboard = () => {
     </>
   );
 };
+
 
 export default PatientDashboard;

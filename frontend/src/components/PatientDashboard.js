@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles.css';  // Import your styles
+import '../styles/patientDashboard.css';  // Import your styles
 import { Home, Calendar, Upload, MessageSquare, User, LogOut } from 'lucide-react';
 const PatientDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
@@ -42,17 +42,16 @@ const PatientDashboard = () => {
 
   const showHomeTab = () => (
     <div className="home-content">
-      <div className="welcome-message">Welcome {userData.firstName} {userData.lastName} !</div>
+      <div className="welcome-message">Welcome {userData.firstName} {userData.lastName}!</div>
       <div className="tab-description">
         <ul>
-          <li>- Appointments: plan, edit and cancel appointments</li>
-          <li>- Upload X-Ray: Upload images to analyze</li>
-          <li>- Messages: Chat with your doctor</li>
+          <li>- <strong>Appointments</strong>: Plan, edit and cancel appointments</li>
+          <li>- <strong>Upload X-Ray</strong>: Upload images to analyze</li>
+          <li>- <strong>Messages</strong>: Chat with your doctor</li>
         </ul>
       </div>
     </div>
   );
-
 
   const handleEditAppointment = (id) => {
     // In a real app, this would open an edit form or modal

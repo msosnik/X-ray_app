@@ -30,8 +30,8 @@ body {
     font-family: 'Roboto', sans-serif;
     font-style: normal;
     font-weight: 400;
-    font-size: 2.5vw;
-    line-height: 3vh;
+    font-size: 3vw;
+    line-height: 1.2;
     color: #65558F;
     text-align: center;
     margin-bottom: 40px;
@@ -41,14 +41,13 @@ body {
 /* Tab description */
 .tab-description {
     font-family: 'Roboto', sans-serif;
-    font-size: 1.2vw;
+    font-size: 1.6vw;
     line-height: 2.5vh;
     color: #65558F;
     width: 80%;
     max-width: 812px;
     margin: 0 auto;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .tab-description ul {
@@ -59,6 +58,12 @@ body {
 
 .tab-description li {
     margin-bottom: 20px;
+    font-size: 1.8vw;
+    line-height: 1.3;
+}
+
+.tab-description li strong {
+    font-weight: bold;
 }
 
 /* Header container for Profile and Logout buttons */
@@ -184,7 +189,7 @@ button:disabled {
     top: 16vh;
     left: 5vw;
     width: 80vw;
-    height: 59vh;
+    height: calc(84vh - 16vh - 20px); /* Subtract top position and add some padding */
     overflow-y: auto;
     color: #65558F;
     z-index: 2;
@@ -196,15 +201,18 @@ button:disabled {
 .home-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     height: 100%;
-    padding-top: 5vh;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent scrolling */
 }
 
 .home-content .welcome-message {
-    font-size: 45px;
-    line-height: 52px;
+    font-size: 2.5vw;
+    line-height: 1.2;
+    margin-bottom: 40px;
 }
 
 .welcome-message {
@@ -219,8 +227,10 @@ button:disabled {
 }
 
 .home-content .tab-description {
-    font-size: 36px;
-    line-height: 44px;
+    font-size: 1.2vw;
+    line-height: 1.5;
+    width: 80%;
+    max-width: 812px;
 }
 
 .home-content .tab-description ul {

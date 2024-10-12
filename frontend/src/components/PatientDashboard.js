@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import '../styles/patientDashboard.css';  // Import your styles
-import { Home, Calendar, Upload, MessageSquare, User, LogOut } from 'lucide-react';
+import '../styles/patientDashboard.css';
+import { Home, Calendar, Upload, MessageSquare, User, LogOut, Phone } from 'lucide-react';
+
 const PatientDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
   const [activeTab, setActiveTab] = useState('home');
-  const [activeDoctor, setActiveDoctor] = useState(null);  // Track the selected doctor
+  const [activeDoctor, setActiveDoctor] = useState(null);
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
 
-  // Simulating user data
   const userData = {
     firstName: "John",
     lastName: "Doe",
   };
 
-  // Simulating appointments data
   const [appointments, setAppointments] = useState([
     { id: 1, doctor: "Dr. Jane Smith", date: "2024-10-05", time: "14:00" },
     { id: 2, doctor: "Dr. Michael Johnson", date: "2024-10-10", time: "10:30" },
@@ -37,7 +36,6 @@ const PatientDashboard = () => {
       { sender: "Dr. Michael Johnson", message: "Your test results are back. Everything looks normal." },
       { sender: "You", message: "That's great news, thank you!" }
     ],
-    // Add more messages if needed for other doctors
   };
 
   const showHomeTab = () => (
@@ -54,24 +52,24 @@ const PatientDashboard = () => {
   );
 
   const handleEditAppointment = (id) => {
-    // In a real app, this would open an edit form or modal
     alert(`Editing appointment with ID: ${id}`);
   };
 
   const handleDeleteAppointment = (id) => {
-    // In a real app, you'd want to show a confirmation dialog before deleting
     setAppointments(appointments.filter(app => app.id !== id));
     alert(`Appointment with ID: ${id} has been deleted`);
   };
 
+  const handleCall = () => {
+    alert(`Calling ${doctors.find(d => d.id === activeDoctor)?.name}`);
+  };
+
   const handleProfileClick = () => {
-    // In a real app, this would navigate to the profile page or open a profile modal
     alert("Opening profile...");
   };
 
   const handleLogout = () => {
-    // In a real app, this would handle the logout process
-    alert("Logging out...");
+    window.location.href = '/login';
   };
 
   const showAppointmentsTab = () => (
@@ -92,9 +90,7 @@ const PatientDashboard = () => {
         <button 
           onClick={() => {
             setIsCreatingAppointment(true);
-            // Here you would typically open a modal or navigate to a form
             alert("Opening appointment request form...");
-            // Simulating an async operation
             setTimeout(() => setIsCreatingAppointment(false), 2000);
           }}
           disabled={isCreatingAppointment}
@@ -139,15 +135,23 @@ const PatientDashboard = () => {
         <button className="create-chat-btn" onClick={() => alert("Create new chat clicked!")}>+ Create Chat</button>
         {doctors.map(doctor => (
           <div
-            className={`doctor-item ${activeDoctor === doctor.id ? 'active' : ''}`}  // Highlight the selected doctor
+            className={`doctor-item ${activeDoctor === doctor.id ? 'active' : ''}`}
             key={doctor.id}
-            onClick={() => setActiveDoctor(doctor.id)}  // Set the active doctor on click
+            onClick={() => setActiveDoctor(doctor.id)}
           >
             {doctor.name}
           </div>
         ))}
       </div>
       <div className="chat-area">
+        {activeDoctor && (
+          <div className="message-bar">
+            <span className="doctor-name">{doctors.find(d => d.id === activeDoctor)?.name}</span>
+            <button className="call-button" onClick={handleCall}>
+              <Phone size={16} /> Call
+            </button>
+          </div>
+        )}
         <div className="chat-messages" id="chatMessages">
           {activeDoctor && chatMessages[activeDoctor] ? (
             chatMessages[activeDoctor].map((msg, index) => (

@@ -11,13 +11,11 @@ const LoginDashboard = ({ onLogin }) => {
   };
 
   const handleRegister = () => {
-    // Here you would typically navigate to a registration page or open a registration modal
     alert('Register functionality to be implemented');
   };
 
   const handleForgotPassword = (e) => {
     e.preventDefault();
-    // Here you would typically navigate to a password reset page or open a reset password modal
     alert('Forgot password functionality to be implemented');
   };
 

@@ -1,10 +1,12 @@
 package com.backend.patient;
+import com.backend.appointment.Appointment;
 import com.backend.doctor.Doctor;
 import com.backend.user.Role;
 import com.backend.user.User;
 import com.backend.xRayImage.XRayImage;
 import jakarta.persistence.*;
 import lombok.*;
+import org.aspectj.weaver.patterns.AndPointcut;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,6 +32,9 @@ public class Patient extends User {
 
     @ManyToMany(mappedBy = "patients")
     private List<Doctor> doctors = new ArrayList<>();
+
+    @OneToMany
+    private List<Appointment> appointments;
 
     private Role role = Role.PATIENT;
 

@@ -1,5 +1,6 @@
 package com.backend.doctor;
 
+import com.backend.appointment.Appointment;
 import com.backend.patient.Patient;
 import com.backend.user.User;
 import jakarta.persistence.*;
@@ -33,6 +34,9 @@ public class Doctor extends User {
             inverseJoinColumns = @JoinColumn(name = "patient_id")
     )
     private List<Patient> patients;
+
+    @OneToMany
+    private List<Appointment> appointments;
 
     public Doctor(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, int medicalLicenceId, int phoneNumber, String clinicAddress, String specialization, String availability, String workingHours) {
         super(email, passwordHash, firstName, lastName, createdAt);

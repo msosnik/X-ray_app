@@ -1,5 +1,7 @@
 package com.backend.doctor;
 
+import com.backend.appointment.Appointment;
+import com.backend.appointment.AppointmentRepository;
 import com.backend.exception.ResourceNotFoundException;
 import com.backend.patient.Patient;
 import com.backend.patient.PatientRepository;
@@ -9,6 +11,7 @@ import com.backend.user.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +25,8 @@ public class DoctorService {
     private PatientRepository patientRepository;
     @Autowired
     private PasswordUtil passwordUtil;
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     // Convert Doctor entity to DoctorDTO
     public DoctorDTO convertToDTO(Doctor doctor) {
@@ -29,7 +34,10 @@ public class DoctorService {
                 .stream()
                 .map(Patient::getId)
                 .collect(Collectors.toList());
-
+        List<Integer> appointmentList = doctor.getAppointments()
+                .stream()
+                .map(Appointment::getId)
+                .collect(Collectors.toList());
         return new DoctorDTO(
                 doctor.getEmail(),
                 doctor.getFirstName(),
@@ -43,7 +51,8 @@ public class DoctorService {
                 doctor.getSpecialization(),
                 doctor.getAvailability(),
                 doctor.getWorkingHours(),
-                patientIds
+                patientIds,
+                appointmentList
         );
     }
 
@@ -71,6 +80,10 @@ public class DoctorService {
         if (doctorDTO.getPatientIds() != null && !doctorDTO.getPatientIds().isEmpty()) {
             List<Patient> patients = patientRepository.findAllById(doctorDTO.getPatientIds());
             doctor.setPatients(patients);
+        }
+        if (doctorDTO.getAppointmentList() != null && !doctorDTO.getAppointmentList().isEmpty()) {
+            List<Appointment> appointments = appointmentRepository.findAllById(doctorDTO.getAppointmentList());
+            doctor.setAppointments(appointments);
         }
 
         return doctor;
@@ -131,7 +144,7 @@ public class DoctorService {
                     doctor.setSpecialization(updatedDoctorDTO.getSpecialization());
                     doctor.setAvailability(updatedDoctorDTO.getAvailability());
                     doctor.setWorkingHours(updatedDoctorDTO.getWorkingHours());
-
+                    doctor.setUpdatedAt(LocalDate.now());
                     // Update Doctors list
                     List<Patient> patients = patientRepository.findAllById(updatedDoctorDTO.getPatientIds());
                     doctor.setPatients(patients);

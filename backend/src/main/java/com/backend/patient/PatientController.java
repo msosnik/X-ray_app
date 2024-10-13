@@ -50,6 +50,14 @@ public class PatientController {
         }
     }
 
+    @PutMapping("/consent/{id}")
+    public ResponseEntity<PatientDTO> submitConsentForm(@PathVariable int id, @RequestBody boolean isConsent) {
+        try {
+            return ResponseEntity.ok(patientService.submitConsentForm(id, isConsent));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePatient(@PathVariable int id) {
         patientService.deletePatientById(id);

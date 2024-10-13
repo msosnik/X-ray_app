@@ -35,7 +35,7 @@ public class Doctor extends User {
     )
     private List<Patient> patients;
 
-    @OneToMany
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<Appointment> appointments;
 
     public Doctor(String email, String passwordHash, String firstName, String lastName, LocalDate createdAt, int medicalLicenceId, int phoneNumber, String clinicAddress, String specialization, String availability, String workingHours) {

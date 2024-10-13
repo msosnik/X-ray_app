@@ -68,17 +68,16 @@ public class DataInitializer implements CommandLineRunner {
         List<Doctor> doctorList = Stream.of(doctor1, doctor2).toList();
         doctorRepository.saveAll(doctorList);
 
+        Appointment appointment1 = new Appointment(patient1, doctor1, LocalDateTime.now().plusDays(1), Status.SCHEDULED, LocalDate.now());
+        Appointment appointment2 = new Appointment(patient1, doctor2, LocalDateTime.now().plusDays(3), Status.CANCELLED, LocalDate.now());
+        appointmentRepository.save(appointment1);
+        appointmentRepository.save(appointment2);
+
         doctor1.setPatients(patientList);
         doctor2.setPatients(patientList);
         patient1.setDoctors(doctorList);
         patient2.setDoctors(doctorList);
         patientRepository.saveAll(patientList);
         doctorRepository.saveAll(doctorList);
-
-        Appointment appointment1 = new Appointment(patient1, doctor1, LocalDateTime.now().plusDays(1), Status.SCHEDULED, LocalDate.now());
-        Appointment appointment2 = new Appointment(patient1, doctor2, LocalDateTime.now().plusDays(3), Status.CANCELLED, LocalDate.now());
-
-        appointmentRepository.save(appointment1);
-        appointmentRepository.save(appointment2);
     }
 }

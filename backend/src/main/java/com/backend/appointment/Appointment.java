@@ -20,6 +20,7 @@ public class Appointment {
     private int id;
     @NonNull
     @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
     @NonNull
     @ManyToOne

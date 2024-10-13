@@ -1,8 +1,10 @@
 package com.backend.patient;
 
-import com.backend.exception.ResourceNotFoundException;
-import com.backend.doctor.DoctorRepository;
+import com.backend.appointment.Appointment;
+import com.backend.appointment.AppointmentRepository;
 import com.backend.doctor.Doctor;
+import com.backend.doctor.DoctorRepository;
+import com.backend.exception.ResourceNotFoundException;
 import com.backend.user.EmailValidator;
 import com.backend.user.PasswordUtil;
 import com.backend.xRayImage.XRayImage;
@@ -10,6 +12,7 @@ import com.backend.xRayImage.XRayImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +26,8 @@ public class PatientService {
     @Autowired
     private DoctorRepository doctorRepository;
     @Autowired
+    private AppointmentRepository appointmentRepository;
+    @Autowired
     private PasswordUtil passwordUtil;
 
     // Convert Patient entity to PatientDTO
@@ -34,6 +39,10 @@ public class PatientService {
         List<Integer> doctorsList = patient.getDoctors()
                 .stream()
                 .map(Doctor::getId)
+                .collect(Collectors.toList());
+        List<Integer> appointmentList = patient.getAppointments()
+                .stream()
+                .map(Appointment::getId)
                 .collect(Collectors.toList());
         return new PatientDTO(
                 patient.getEmail(),
@@ -47,7 +56,8 @@ public class PatientService {
                 patient.getPhoneNumber(),
                 patient.isConsentToUseImages(),
                 doctorsList,
-                xrayImageList
+                xrayImageList,
+                appointmentList
         );
     }
 
@@ -72,6 +82,10 @@ public class PatientService {
         if (patientDTO.getDoctorList() != null && !patientDTO.getDoctorList().isEmpty()) {
             List<Doctor> doctors = doctorRepository.findAllById(patientDTO.getDoctorList());
             patient.setDoctors(doctors);
+        }
+        if (patientDTO.getAppointmentList() != null && !patientDTO.getAppointmentList().isEmpty()) {
+            List<Appointment> appointments = appointmentRepository.findAllById(patientDTO.getAppointmentList());
+            patient.setAppointments(appointments);
         }
         return patient;
     }
@@ -125,9 +139,16 @@ public class PatientService {
                     patient.setAddress(updatedPatientDTO.getAddress());
                     patient.setPhoneNumber(updatedPatientDTO.getPhoneNumber());
                     patient.setConsentToUseImages(updatedPatientDTO.isConsentToUseImages());
+                    patient.setUpdatedAt(LocalDate.now());
                     return convertToDTO(patientRepository.save(patient));
                 })
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
+    }
+    public PatientDTO submitConsentForm(int id, boolean isConsent){
+        Patient patient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+        patient.setConsentToUseImages(isConsent);
+        patient.setUpdatedAt(LocalDate.now());
+        return convertToDTO(patientRepository.save(patient));
     }
 
     public void deletePatientById(int id) {

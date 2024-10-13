@@ -34,6 +34,7 @@ public class DoctorDTO {
 
     private String workingHours;
 
-    // List of patient IDs
     private List<Integer> patientIds;
+
+    private List<Integer> appointmentList;
 }

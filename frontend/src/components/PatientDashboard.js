@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../styles/patientDashboard.css';
 import { Home, Calendar, Upload, MessageSquare, User, LogOut, Phone } from 'lucide-react';
+import PatientProfileDashboard from './PatientProfileDashboard';
 
 const PatientDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
@@ -65,7 +66,8 @@ const PatientDashboard = () => {
   };
 
   const handleProfileClick = () => {
-    alert("Opening profile...");
+    setTabContent('profile');
+    setActiveTab('profile');
   };
 
   const handleLogout = () => {
@@ -171,6 +173,7 @@ const PatientDashboard = () => {
     </div>
   );
 
+
   const renderTabContent = () => {
     switch (tabContent) {
       case 'home':
@@ -181,6 +184,8 @@ const PatientDashboard = () => {
         return showUploadXRayTab();
       case 'messages':
         return showMessagesTab();
+      case 'profile':
+        return <PatientProfileDashboard />;
       default:
         return null;
     }
@@ -240,6 +245,5 @@ const PatientDashboard = () => {
     </>
   );
 };
-
 
 export default PatientDashboard;

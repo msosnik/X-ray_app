@@ -7,8 +7,6 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogin = (username, password) => {
-    // Here you would typically make an API call to verify the credentials
-    // For this example, we'll just check if both fields are non-empty
     if (username && password) {
       setIsLoggedIn(true);
     } else {

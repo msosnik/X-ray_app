@@ -54,6 +54,7 @@
     overflow-y: auto;
     padding-right: 5px;
     overflow: visible;
+    padding-left: 5px;
   }
   
   .nav-button {
@@ -69,13 +70,17 @@
     transition: background-color 0.3s;
     flex-shrink: 0;
     white-space: nowrap;
-    width: 100%;
+    width: calc(100% - 5px);
     justify-content: flex-start;
     box-sizing: border-box;
+    margin-left: 5px;
   }
   
   .nav-button:hover, .nav-button.active {
     background-color: #D6BCFF;
+    width: 100%;
+    margin-left: 0;
+    padding-left: 15px;
   }
 
   .nav-button.active {

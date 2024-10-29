@@ -17,22 +17,8 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/login" 
-          element={
-            isLoggedIn ? 
-              <Navigate to="/patient-dashboard" /> : 
-              <LoginDashboard onLogin={handleLogin} />
-          } 
-        />
-        <Route 
-          path="/patient-dashboard" 
-          element={
-            isLoggedIn ? 
-              <PatientDashboard /> : 
-              <Navigate to="/login" />
-          } 
-        />
+        <Route path="/login" element={isLoggedIn ? <Navigate to="/patient-dashboard" /> : <LoginDashboard onLogin={handleLogin} />} />
+        <Route path="/patient-dashboard" element={isLoggedIn ? <PatientDashboard /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

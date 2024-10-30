@@ -370,6 +370,41 @@ button:disabled {
     background-color: #4A4459;
 }
 
+.xray-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.xray-image.has-image {
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.processing-message,
+.placeholder-message {
+    color: #65558F;
+    text-align: center;
+    padding: 20px;
+}
+
+.clear-image-btn {
+    margin-top: 10px;
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 1em;
+    width: 100%;
+}
+
+.clear-image-btn:hover {
+    background-color: #4A4459;
+}
+
 .messages-container {
     display: flex;
     height: 100%;

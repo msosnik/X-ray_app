@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import '../styles/patientDashboard.css';
 import { Home, Calendar, Upload, MessageSquare, User, LogOut, Phone } from 'lucide-react';
 import PatientProfileDashboard from './PatientProfileDashboard';
@@ -8,6 +8,9 @@ const PatientDashboard = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [activeDoctor, setActiveDoctor] = useState(null);
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [processedImage, setProcessedImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   const userData = {
     firstName: "John",
@@ -74,6 +77,20 @@ const PatientDashboard = () => {
     window.location.href = '/login';
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setUploadedImage(reader.result);
+        setProcessedImage('Processed image will be shown here after backend processing');
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Please upload a valid image file');
+    }
+  };
+
   const showAppointmentsTab = () => (
     <div>
       <div className="appointments-list">
@@ -119,18 +136,67 @@ const PatientDashboard = () => {
       <div className="xray-content">
         <div className="xray-section">
           <h3>Original</h3>
-          <div id="originalImage" className="xray-image"></div>
-          <input type="file" id="xrayUpload" accept="image/png" style={{ display: 'none' }} />
-          <button id="uploadBtn" onClick={() => document.getElementById('xrayUpload').click()}>Upload Image (PNG)</button>
+          <div id="originalImage" className={`xray-image ${uploadedImage ? 'has-image' : ''}`}>
+            {uploadedImage ? (
+              <img 
+                src={uploadedImage} 
+                alt="Original X-Ray" 
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+              />
+            ) : (
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+            )}
+            <button 
+              id="uploadBtn" 
+              onClick={() => fileInputRef.current.click()}
+              style={{ display: uploadedImage ? 'none' : 'flex' }}
+            >
+              Upload Image
+            </button>
+          </div>
+          {uploadedImage && (
+            <button 
+              onClick={() => {
+                setUploadedImage(null);
+                setProcessedImage(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
+              }}
+              className="clear-image-btn"
+            >
+              Clear Image
+            </button>
+          )}
         </div>
         <div className="xray-section">
           <h3>Results</h3>
-          <div id="processedImage" className="xray-image">Processed image will appear here</div>
+          <div id="processedImage" className="xray-image">
+            {processedImage ? (
+              typeof processedImage === 'string' ? (
+                <div className="processing-message">{processedImage}</div>
+              ) : (
+                <img 
+                  src={processedImage} 
+                  alt="Processed X-Ray" 
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+                />
+              )
+            ) : (
+              <div className="placeholder-message">Upload an image to see results</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
-
+  
   const showMessagesTab = () => (
     <div className="messages-container">
       <div className="doctors-list">

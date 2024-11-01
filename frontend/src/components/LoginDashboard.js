@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, ChevronDown } from 'lucide-react';
 import '../styles/loginDashboard.css';
 
 const LoginDashboard = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState('patient');
 
   const handleLogin = () => {
-    onLogin(username, password);
+    onLogin(username, password, selectedRole);
   };
 
   const handleRegister = () => {
@@ -18,6 +19,7 @@ const LoginDashboard = ({ onLogin }) => {
     e.preventDefault();
     alert('Forgot password functionality to be implemented');
   };
+
 
   return (
     <div className="login-container">
@@ -40,6 +42,18 @@ const LoginDashboard = ({ onLogin }) => {
               placeholder="Password"
             />
           </div>
+          <div className="input-field role-selection">
+            <label htmlFor="roleSelect">Role:</label>
+            <select 
+              id="roleSelect" 
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              className="role-select"
+            >
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+            </select>
+          </div>
           <div className="button-group">
             <button className="register-button" onClick={handleRegister}>
               <UserPlus size={24} />
@@ -50,7 +64,9 @@ const LoginDashboard = ({ onLogin }) => {
               <span>Login</span>
             </button>
           </div>
-          <a href="#" className="forgot-password" onClick={handleForgotPassword}>forgot your password?</a>
+          <a href="#" className="forgot-password" onClick={handleForgotPassword}>
+            forgot your password?
+          </a>
         </div>
       </div>
     </div>

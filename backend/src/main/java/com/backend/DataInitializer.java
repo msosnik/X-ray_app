@@ -26,15 +26,15 @@ public class DataInitializer implements CommandLineRunner {
 
     private final PatientRepository patientRepository;
     private final XRayImageRepository xRayImageRepository;
-    private final AnalysisResultRepository analysysResulrRepository;
+    private final AnalysisResultRepository analysisResulrRepository;
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final PasswordUtil passwordUtil;
 
-    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysysResulrRepository, DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil) {
+    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysisResultRepository, DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil) {
         this.patientRepository = patientRepository;
         this.xRayImageRepository = xRayImageRepository;
-        this.analysysResulrRepository = analysysResulrRepository;
+        this.analysisResulrRepository = analysisResultRepository;
         this.doctorRepository = doctorRepository;
         this.appointmentRepository = appointmentRepository;
         this.passwordUtil = passwordUtil;
@@ -53,15 +53,15 @@ public class DataInitializer implements CommandLineRunner {
         patientRepository.save(patient3);
 
         // Create XRay Images
-        XRayImage image1 = new XRayImage("/images/xray1.jpg", patient1, LocalDate.now(), "Chest");
-        XRayImage image2 = new XRayImage("/images/xray2.jpg", patient2, LocalDate.now(), "Knee");
+        XRayImage image1 = new XRayImage("images/1.jpg", patient1, LocalDate.now(), "Chest");
+        XRayImage image2 = new XRayImage("images/2.jpeg", patient2, LocalDate.now(), "Knee");
         xRayImageRepository.save(image1);
         xRayImageRepository.save(image2);
 
         AnalysisResult result1 = new AnalysisResult(image1, Arrays.asList("broken rib 3", "no sternum"), LocalDate.now());
         AnalysisResult result2 = new AnalysisResult(image2, Arrays.asList("broken long bone", "knee dislocation"), LocalDate.now());
         List<AnalysisResult> resultList = Stream.of(result1, result2).toList();
-        analysysResulrRepository.saveAll(resultList);
+        analysisResulrRepository.saveAll(resultList);
 
         Doctor doctor1 = new Doctor("doc1@example.com", passwordUtil.hashPassword("password"), "John", "Doe", LocalDate.now(), 67779, 123456, "123 Clinic St.", "Cardiology", "Mon-Fri", "9 AM - 5 PM");
         Doctor doctor2 = new Doctor("doc2@example.com", passwordUtil.hashPassword("password"), "Jane", "Smith", LocalDate.now(), 82286116, 654321, "456 Hospital Rd.", "Neurology", "Mon-Wed", "10 AM - 4 PM");

@@ -171,10 +171,10 @@ const DoctorDashboard = () => {
       </div>
       <div className="xray-content">
         <div className="xray-section">
-          <h3>Original X-Ray</h3>
+          <h3>Original</h3>
           <div className={`xray-image ${uploadedImage ? 'has-image' : ''}`}>
             {uploadedImage ? (
-              <img src={uploadedImage} alt="Original X-Ray" />
+              <img src={uploadedImage} alt="Original" />
             ) : (
               <input
                 type="file"
@@ -223,7 +223,7 @@ const DoctorDashboard = () => {
                 </>
               ) : (
                 <div className="placeholder-message">
-                  Upload an X-ray to see analysis results
+                  Upload an image to see results
                 </div>
               )}
             </div>
@@ -262,7 +262,7 @@ const DoctorDashboard = () => {
                 {patients.find(p => p.id === activePatient)?.name}
               </span>
               <button className="call-button" onClick={() => alert("Starting video call...")}>
-                <Phone size={16} /> Video Call
+                <Phone size={16} /> Call
               </button>
             </div>
             <div className="chat-messages">

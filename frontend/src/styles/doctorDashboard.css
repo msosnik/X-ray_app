@@ -361,12 +361,12 @@ button:disabled {
   
 .analysis-select {
     height: 40px;
-    padding: 8px 16px;
-    font-size: 1em;
+    padding: 1vh 4vw 1vh 1vw;
+    font-size: 1.2em;
     color: #65558F;
     background: #FFFFFF;
     border: 1px solid #65558F;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: pointer;
     min-width: 200px;
     appearance: none;
@@ -375,6 +375,8 @@ button:disabled {
     background-position: right 20px center;
     background-size: 16px;
     padding-right: 40px;
+    align-items: center;
+    line-height: 2vh;
 }
 
 .analysis-select:hover {
@@ -385,6 +387,18 @@ button:disabled {
     outline: none;
     border-color: #65558F;
     box-shadow: 0 0 0 2px rgba(101, 85, 143, 0.2);
+}
+
+.body-part-selection label {
+    font-size: 1vw;
+    color: #65558F;
+    font-weight: 500;
+    line-height: 2vh;
+}
+  
+.body-part-selection label:first-child {
+    font-size: 1vw;
+    line-height: 2vh;
 }
 
 .xray-content {
@@ -414,9 +428,24 @@ button:disabled {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    position: relative;
+    min-height: 300px;
 }
+
+.xray-image .upload-btn {
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 1.2vw;
+    white-space: nowrap;
+    height: 3.5vw;
+    width: 13.5vw;
+}
+  
+.xray-image .upload-btn:hover {
+    background-color: #4A4459;
+} 
 
 .upload-btn {
     background: #65558F;
@@ -427,8 +456,37 @@ button:disabled {
     font-size: 1.1em;
 }
 
+#uploadBtn {
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 2vh 3vw;
+    border-radius: 25px;
+    font-size: 1.2vw;
+    white-space: nowrap;
+    min-width: 160px;
+    min-height: 50px;
+    text-align: center;
+    z-index: 2;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.placeholder-message {
+    font-size: 1.4em;
+    color: #65558F;
+    text-align: center;
+    padding: 2vh;
+}
+
 .analysis-results {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .analysis-text {

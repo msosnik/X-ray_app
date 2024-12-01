@@ -1,7 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/patientDashboard.css';
 import { Home, Calendar, Upload, MessageSquare, User, LogOut, Phone } from 'lucide-react';
 import PatientProfileDashboard from './PatientProfileDashboard';
+import { 
+  Call, 
+  StreamCall, 
+  StreamVideo, 
+  StreamVideoClient, 
+  CallControls,
+  ParticipantView,
+} from '@stream-io/video-react-sdk';
+import 'stream-chat-react/dist/css/index.css';
+import '@stream-io/video-react-sdk/dist/css/styles.css';
 
 const PatientDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
@@ -10,7 +21,16 @@ const PatientDashboard = () => {
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
+  const [upcomingConsultations, setUpcomingConsultations] = useState([]);
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const [videoCall, setVideoCall] = useState(null);
+  const [streamVideoClient, setStreamVideoClient] = useState(null);
+
+  const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
+  const USER_ID = 'patient_john_doe';
+  const USER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicGF0aWVudF9qb2huX2RvZSJ9.placeholder_patient_token';
+  const CONSULTATION_ROOM_ID = 'consultation_room';
 
   const userData = {
     firstName: "John",
@@ -62,10 +82,6 @@ const PatientDashboard = () => {
   const handleDeleteAppointment = (id) => {
     setAppointments(appointments.filter(app => app.id !== id));
     alert(`Appointment with ID: ${id} has been deleted`);
-  };
-
-  const handleCall = () => {
-    alert(`Calling ${doctors.find(d => d.id === activeDoctor)?.name}`);
   };
 
   const handleProfileClick = () => {
@@ -215,7 +231,7 @@ const PatientDashboard = () => {
         {activeDoctor && (
           <div className="message-bar">
             <span className="doctor-name">{doctors.find(d => d.id === activeDoctor)?.name}</span>
-            <button className="call-button" onClick={handleCall}>
+            <button className="call-button" onClick={handleCall} disabled={!activeDoctor}>
               <Phone size={16} /> Call
             </button>
           </div>
@@ -257,11 +273,67 @@ const PatientDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    const initStreamVideoClient = async () => {
+      try {
+        const videoClient = new StreamVideoClient({ 
+          apiKey: API_KEY, 
+          user: { 
+            id: USER_ID, 
+            name: `${userData.firstName} ${userData.lastName}` 
+          },
+          token: USER_TOKEN
+        });
+        setStreamVideoClient(videoClient);
+      } catch (error) {
+        console.error('Stream initialization error:', error);
+      }
+    };
 
+    if (API_KEY) {
+      initStreamVideoClient();
+    }
+
+    // Cleanup
+    return () => {
+      if (streamVideoClient) {
+        streamVideoClient.disconnectUser();
+      }
+    };
+  }, [API_KEY]);
+
+  const handleCall = async () => {
+    if (!streamVideoClient || !activeDoctor) {
+      alert('Video client not initialized');
+      return;
+    }
+
+    try {
+      const call = streamVideoClient.call('default', CONSULTATION_ROOM_ID);
+      
+      await call.join({ create: false });
+      
+      await call.camera.enable();
+      await call.microphone.enable();
+  
+      setVideoCall(call);
+      navigate(`/consultation/${CONSULTATION_ROOM_ID}`);
+
+    } catch (error) {
+      console.error('Video call join error:', error);
+      alert(`Failed to join video call: ${error.message}`);
+    }
+  };
+
+  const endVideoCall = async () => {
+    if (videoCall) {
+      await videoCall.leave();
+      setVideoCall(null);
+    }
+  };
 
   return (
     <>
-      {/* Header with Profile and Logout buttons */}
       <div className="header">
         <button id="profileBtn" onClick={handleProfileClick}>
           <User size={20} />
@@ -273,14 +345,11 @@ const PatientDashboard = () => {
         </button>
       </div>
 
-      {/* Main dashboard container */}
       <div className="dashboard-container">
-        {/* Tab Content */}
         <div id="tabContent">
           {renderTabContent()}
         </div>
 
-        {/* Tabs */}
         <div className="tabs">
           <button
             className={`fab-button ${activeTab === 'home' ? 'active' : ''}`}
@@ -308,6 +377,23 @@ const PatientDashboard = () => {
           </button>
         </div>
       </div>
+      {videoCall && streamVideoClient && (
+        <StreamVideo client={streamVideoClient}>
+          <StreamCall call={videoCall}>
+            <div className="video-call-container">
+              {videoCall.participants.map((participant) => (
+                <div key={participant.user_id} className="participant-container">
+                  <ParticipantView 
+                    participant={participant} 
+                    className={participant.user_id === USER_ID ? 'local-participant' : 'remote-participant'}
+                  />
+                </div>
+              ))}
+              <CallControls onLeave={endVideoCall} />
+            </div>
+          </StreamCall>
+        </StreamVideo>
+      )}
     </>
   );
 };

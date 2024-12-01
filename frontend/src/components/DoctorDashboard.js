@@ -1,6 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Home, Users, Calendar, Upload, MessageSquare, User, LogOut, Phone, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/doctorDashboard.css'
+import 'stream-chat-react/dist/css/index.css';
+import '@stream-io/video-react-sdk/dist/css/styles.css';
+import { StreamChat } from 'stream-chat';
+import { 
+  Call, 
+  StreamCall, 
+  StreamVideo, 
+  StreamVideoClient, 
+  CallControls,
+  ParticipantView,
+} from '@stream-io/video-react-sdk';
 
 const DoctorDashboard = () => {
   const [tabContent, setTabContent] = useState('home');
@@ -11,8 +23,19 @@ const DoctorDashboard = () => {
   const [processedImage, setProcessedImage] = useState(null);
   const [selectedPatient, setSelectedPatient] = useState('');
   const [selectedBodyPart, setSelectedBodyPart] = useState('chest');
+  const [scheduledConsultations, setScheduledConsultations] = useState([]);
+  const [videoCall, setVideoCall] = useState(null);
+  const [streamVideoClient, setStreamVideoClient] = useState(null);
+  const [streamChatClient, setStreamChatClient] = useState(null);
+  const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
+  const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
+
+  const USER_ID = 'doctor_jane_smith';
+  const USER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZG9jdG9yX2phbmVfc21pdGgifQ.placeholder_token_for_testing';
+  const CONSULTATION_ROOM_ID = 'consultation_room';
+  
   const doctorData = {
     firstName: "Jane",
     lastName: "Smith",
@@ -261,8 +284,10 @@ const DoctorDashboard = () => {
               <span className="patient-name">
                 {patients.find(p => p.id === activePatient)?.name}
               </span>
-              <button className="call-button" onClick={() => alert("Starting video call...")}>
-                <Phone size={16} /> Call
+              <button className="call-button" onClick={
+                startVideoCall
+              }>
+              <Phone size={16} /> Call
               </button>
             </div>
             <div className="chat-messages">
@@ -285,6 +310,70 @@ const DoctorDashboard = () => {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    const initStreamVideoClient = async () => {
+      try {
+        const videoClient = new StreamVideoClient({ 
+          apiKey: API_KEY, 
+          user: { 
+            id: USER_ID, 
+            name: 'Dr. Jane Smith' 
+          },
+          token: USER_TOKEN
+        });
+        setStreamVideoClient(videoClient);
+      } catch (error) {
+        console.error('Stream initialization error:', error);
+      }
+    };
+
+    if (API_KEY) {
+      initStreamVideoClient();
+    }
+
+    return () => {
+      if (streamVideoClient) {
+        streamVideoClient.disconnectUser();
+      }
+    };
+  }, [API_KEY]);
+
+  const startVideoCall = async (patient) => {
+    if (!streamVideoClient) return;
+    try {
+      const call = streamVideoClient.call('default', CONSULTATION_ROOM_ID);
+      
+      await call.create({
+        data: {
+          members: [
+            {
+              user_id: USER_ID,
+              role: 'call_member'
+            }
+          ]
+        }
+      });
+      
+      await call.join({ create: true });
+  
+      await call.camera.enable();
+      await call.microphone.enable();
+  
+      setVideoCall(call);
+      navigate(`/consultation/${CONSULTATION_ROOM_ID}`);
+    } catch (error) {
+      console.error('Video call error:', error);
+      alert(`Failed to start video call: ${error.message}`);
+    }
+  };
+
+  const endVideoCall = async () => {
+    if (videoCall) {
+      await videoCall.leave();
+      setVideoCall(null);
+    }
+  };
 
   const handleProfileClick = () => {
     setTabContent('profile');
@@ -363,6 +452,23 @@ const DoctorDashboard = () => {
           </button>
         </div>
       </div>
+      {videoCall && streamVideoClient && (
+        <StreamVideo client={streamVideoClient}>
+          <StreamCall call={videoCall}>
+            <div className="video-call-container">
+              {videoCall.participants.map((participant) => (
+                <div key={participant.user_id} className="participant-container">
+                  <ParticipantView 
+                    participant={participant} 
+                    className={participant.user_id === USER_ID ? 'local-participant' : 'remote-participant'}
+                  />
+                </div>
+              ))}
+              <CallControls onLeave={endVideoCall} />
+            </div>
+          </StreamCall>
+        </StreamVideo>
+      )}
     </>
   );
 };

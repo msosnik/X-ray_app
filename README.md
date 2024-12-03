@@ -9,7 +9,7 @@ web application for analysing X-ray photos, written for engineering thesis
 ```
 ### Execute the following to run the Spring Boot application:
 ```bash
-./gradlew bootRun
+java -jar build/libs/backend-0.0.1-SNAPSHOT.jar
 ```
 
 By default, the application will run on http://localhost:8080

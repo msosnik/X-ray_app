@@ -2,6 +2,8 @@ package com.backend;
 
 import com.backend.analysys.AnalysisResult;
 import com.backend.analysys.AnalysisResultRepository;
+import com.backend.annotation.Annotation;
+import com.backend.annotation.AnnotationRepository;
 import com.backend.appointment.Appointment;
 import com.backend.appointment.AppointmentRepository;
 import com.backend.appointment.Status;
@@ -26,22 +28,28 @@ public class DataInitializer implements CommandLineRunner {
 
     private final PatientRepository patientRepository;
     private final XRayImageRepository xRayImageRepository;
-    private final AnalysisResultRepository analysisResulrRepository;
+    private final AnalysisResultRepository analysisResultRepository;
     private final DoctorRepository doctorRepository;
+    private final AnnotationRepository annotationRepository;
     private final AppointmentRepository appointmentRepository;
     private final PasswordUtil passwordUtil;
 
-    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysisResultRepository, DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil) {
+    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysisResultRepository, DoctorRepository doctorRepository, AnnotationRepository annotationRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil) {
         this.patientRepository = patientRepository;
         this.xRayImageRepository = xRayImageRepository;
-        this.analysisResulrRepository = analysisResultRepository;
+        this.analysisResultRepository = analysisResultRepository;
         this.doctorRepository = doctorRepository;
+        this.annotationRepository = annotationRepository;
         this.appointmentRepository = appointmentRepository;
         this.passwordUtil = passwordUtil;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        if (patientRepository.count() > 0) {
+            return;
+            }
+
         // Create Patients
         Patient patient1 = new Patient("john.doe@example.com", passwordUtil.hashPassword("password"), "John", "Doe", LocalDate.now(), LocalDate.of(1990, 1, 1), "123 Main St, Anytown, USA", 1234567890 );
         Patient patient2 = new Patient("jane.smith@example.com", passwordUtil.hashPassword("password"), "Jane", "Smith", LocalDate.now(), LocalDate.of(2000, 1, 1), "Grodzka 1, Kraków", 111111111);
@@ -61,12 +69,19 @@ public class DataInitializer implements CommandLineRunner {
         AnalysisResult result1 = new AnalysisResult(image1, Arrays.asList("broken rib 3", "no sternum"), LocalDate.now());
         AnalysisResult result2 = new AnalysisResult(image2, Arrays.asList("broken long bone", "knee dislocation"), LocalDate.now());
         List<AnalysisResult> resultList = Stream.of(result1, result2).toList();
-        analysisResulrRepository.saveAll(resultList);
+        analysisResultRepository.saveAll(resultList);
 
         Doctor doctor1 = new Doctor("doc1@example.com", passwordUtil.hashPassword("password"), "John", "Doe", LocalDate.now(), 67779, 123456, "123 Clinic St.", "Cardiology", "Mon-Fri", "9 AM - 5 PM");
         Doctor doctor2 = new Doctor("doc2@example.com", passwordUtil.hashPassword("password"), "Jane", "Smith", LocalDate.now(), 82286116, 654321, "456 Hospital Rd.", "Neurology", "Mon-Wed", "10 AM - 4 PM");
         List<Doctor> doctorList = Stream.of(doctor1, doctor2).toList();
         doctorRepository.saveAll(doctorList);
+
+        Annotation annotation = new Annotation();
+        annotation.setAnalysisResult(result1);
+        annotation.setDoctor(doctor1);
+        annotation.setAnnotationData("{\"abnormality\": \"Fracture\", \"severity\": \"High\"}");
+        annotation.setCreatedAt(LocalDateTime.now());
+        annotationRepository.save(annotation);
 
         Appointment appointment1 = new Appointment(patient1, doctor1, LocalDateTime.now().plusDays(1), Status.SCHEDULED, LocalDate.now());
         Appointment appointment2 = new Appointment(patient1, doctor2, LocalDateTime.now().plusDays(3), Status.CANCELLED, LocalDate.now());

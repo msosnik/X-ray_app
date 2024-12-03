@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @MappedSuperclass
 @NoArgsConstructor
 @RequiredArgsConstructor
+//@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class User {
 
     @Id

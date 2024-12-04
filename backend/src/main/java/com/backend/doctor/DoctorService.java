@@ -78,7 +78,7 @@ public class DoctorService {
 
         // Convert patient IDs to Patient entities
         if (doctorDTO.getPatientIds() != null && !doctorDTO.getPatientIds().isEmpty()) {
-            List<Patient> patients = patientRepository.findAllById(doctorDTO.getPatientIds());
+            List<Patient> patients = patientRepository.findAllPatientsByIds(doctorDTO.getPatientIds());
             doctor.setPatients(patients);
         }
         if (doctorDTO.getAppointmentList() != null && !doctorDTO.getAppointmentList().isEmpty()) {
@@ -111,14 +111,14 @@ public class DoctorService {
 
     // Method to get all doctors
     public List<DoctorDTO> getAllDoctors() {
-        return doctorRepository.findAll().stream()
+        return doctorRepository.findAllDoctors().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     // Method to get a doctor by ID
     public DoctorDTO getDoctorById(int id) {
-        return doctorRepository.findById(id)
+        return doctorRepository.findDoctorById(id)
                 .map(this::convertToDTO)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
     }
@@ -134,7 +134,7 @@ public class DoctorService {
 
     // Method to update a doctor
     public DoctorDTO updateDoctor(int id, DoctorDTO updatedDoctorDTO) {
-        return doctorRepository.findById(id)
+        return doctorRepository.findDoctorById(id)
                 .map(doctor -> {
                     doctor.setFirstName(updatedDoctorDTO.getFirstName());
                     doctor.setLastName(updatedDoctorDTO.getLastName());
@@ -146,7 +146,7 @@ public class DoctorService {
                     doctor.setWorkingHours(updatedDoctorDTO.getWorkingHours());
                     doctor.setUpdatedAt(LocalDate.now());
                     // Update Doctors list
-                    List<Patient> patients = patientRepository.findAllById(updatedDoctorDTO.getPatientIds());
+                    List<Patient> patients = patientRepository.findAllPatientsByIds(updatedDoctorDTO.getPatientIds());
                     doctor.setPatients(patients);
 
                     return convertToDTO(doctorRepository.save(doctor));
@@ -164,10 +164,10 @@ public class DoctorService {
     }
 
     public void addPatientToDoctor(int doctorId, int patientId) {
-        Doctor doctor = doctorRepository.findById(doctorId)
+        Doctor doctor = doctorRepository.findDoctorById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with id: " + doctorId));
 
-        Patient patient = patientRepository.findById(patientId)
+        Patient patient = patientRepository.findPatientById(patientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + patientId));
 
         // Add patient to doctor's patient list

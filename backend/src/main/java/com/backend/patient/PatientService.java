@@ -7,6 +7,7 @@ import com.backend.doctor.DoctorRepository;
 import com.backend.exception.ResourceNotFoundException;
 import com.backend.user.EmailValidator;
 import com.backend.user.PasswordUtil;
+import com.backend.user.Role;
 import com.backend.xRayImage.XRayImage;
 import com.backend.xRayImage.XRayImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,13 +75,14 @@ public class PatientService {
                 patientDTO.getAddress(),
                 patientDTO.getPhoneNumber()
         );
+    patient.setRole(Role.PATIENT);
         patient.setConsentToUseImages(patientDTO.isConsentToUseImages());
         if (patientDTO.getXrayImages() != null && !patientDTO.getXrayImages().isEmpty()) {
             List<XRayImage> xrayImages = xRayImageRepository.findAllById(patientDTO.getXrayImages());
             patient.setXrayImages(xrayImages);
         }
         if (patientDTO.getDoctorList() != null && !patientDTO.getDoctorList().isEmpty()) {
-            List<Doctor> doctors = doctorRepository.findAllById(patientDTO.getDoctorList());
+            List<Doctor> doctors = doctorRepository.findAllDoctorsByIds(patientDTO.getDoctorList());
             patient.setDoctors(doctors);
         }
         if (patientDTO.getAppointmentList() != null && !patientDTO.getAppointmentList().isEmpty()) {
@@ -111,13 +113,13 @@ public class PatientService {
     }
 
     public List<PatientDTO> getAllPatients() {
-        return patientRepository.findAll().stream()
+        return patientRepository.findAllPatients().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     public PatientDTO getPatientById(int id) {
-        return patientRepository.findById(id)
+        return patientRepository.findPatientById(id)
                 .map(this::convertToDTO)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
     }
@@ -131,7 +133,7 @@ public class PatientService {
     }
 
     public PatientDTO updatePatient(int id, PatientDTO updatedPatientDTO) {
-        return patientRepository.findById(id)
+        return patientRepository.findPatientById(id)
                 .map(patient -> {
                     patient.setFirstName(updatedPatientDTO.getFirstName());
                     patient.setLastName(updatedPatientDTO.getLastName());
@@ -145,14 +147,14 @@ public class PatientService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
     }
     public PatientDTO submitConsentForm(int id, boolean isConsent){
-        Patient patient = patientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
+        Patient patient = patientRepository.findPatientById(id).orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
         patient.setConsentToUseImages(isConsent);
         patient.setUpdatedAt(LocalDate.now());
         return convertToDTO(patientRepository.save(patient));
     }
 
     public void deletePatientById(int id) {
-        Patient patient = patientRepository.findById(id)
+        Patient patient = patientRepository.findPatientById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + id));
 
         // This will remove the patient's association with any XRayImages if using orphan removal

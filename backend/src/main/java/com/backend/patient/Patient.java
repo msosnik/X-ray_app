@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Entity
 @Table(name="patient")
+@DiscriminatorValue("PATIENT")
 public class Patient extends User {
 
     @NonNull

@@ -25,9 +25,9 @@ public class AppointmentService {
 
     // Convert DTO to Entity
     public Appointment convertToEntity(AppointmentDTO dto) {
-        Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+        Doctor doctor = doctorRepository.findDoctorById(dto.getDoctorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with id " + dto.getDoctorId()));
-        Patient patient = patientRepository.findById(dto.getPatientId())
+        Patient patient = patientRepository.findPatientById(dto.getPatientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id " + dto.getPatientId()));
 
         return new Appointment(

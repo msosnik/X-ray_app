@@ -42,7 +42,7 @@ public class AnnotationService {
                         .orElseThrow(() -> new RuntimeException("AnalysisResult not found"))
         );
         annotation.setDoctor(
-                doctorRepository.findById(annotationDTO.getDoctorId())
+                doctorRepository.findDoctorById(annotationDTO.getDoctorId())
                         .orElseThrow(() -> new RuntimeException("Doctor not found"))
         );
         annotation.setAnnotationData(annotationDTO.getAnnotationData());

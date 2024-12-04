@@ -1,17 +1,18 @@
 package com.backend.user;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
-@Data
-@MappedSuperclass
+//@MappedSuperclass
 @NoArgsConstructor
+@Getter
+@Setter
 @RequiredArgsConstructor
-//@Inheritance(strategy = InheritanceType.JOINED)
+@Entity
+@Table(name="app_user")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "role", discriminatorType = DiscriminatorType.STRING)
 public abstract class User {
 
     @Id
@@ -32,6 +33,7 @@ public abstract class User {
     private String lastName;
 
     @Enumerated(EnumType.STRING)
+    @Column(insertable = false, updatable = false)
     private Role role; //(Enum: 'general_user', 'patient', 'doctor')
 
     @NonNull

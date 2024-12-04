@@ -59,7 +59,7 @@ public class XRayImageService {
     private XRayImage convertToEntity(XRayImageDTO dto) {
         XRayImage image = new XRayImage();
         image.setImagePath(dto.getImagePath());
-        image.setPatient(patientRepository.findById(dto.getPatientId()).orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: "+ dto.getPatientId())));
+        image.setPatient(patientRepository.findPatientById(dto.getPatientId()).orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: "+ dto.getPatientId())));
         image.setUploadDate(dto.getUploadDate());
         image.setBodyPart(dto.getBodyPart());
         return image;

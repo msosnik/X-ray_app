@@ -15,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Entity
 @Table(name="doctor")
+@DiscriminatorValue("DOCTOR")
 public class Doctor extends User {
 
     @Column(unique = true)

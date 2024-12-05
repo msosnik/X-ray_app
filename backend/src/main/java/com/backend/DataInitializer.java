@@ -7,11 +7,16 @@ import com.backend.annotation.AnnotationRepository;
 import com.backend.appointment.Appointment;
 import com.backend.appointment.AppointmentRepository;
 import com.backend.appointment.Status;
+import com.backend.chat.Chat;
+import com.backend.chat.ChatRepository;
 import com.backend.doctor.Doctor;
 import com.backend.doctor.DoctorRepository;
+import com.backend.message.Message;
+import com.backend.message.MessageRepository;
 import com.backend.patient.Patient;
 import com.backend.patient.PatientRepository;
 import com.backend.user.PasswordUtil;
+import com.backend.user.User;
 import com.backend.xRayImage.XRayImage;
 import com.backend.xRayImage.XRayImageRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -33,8 +38,10 @@ public class DataInitializer implements CommandLineRunner {
     private final AnnotationRepository annotationRepository;
     private final AppointmentRepository appointmentRepository;
     private final PasswordUtil passwordUtil;
+    private final ChatRepository chatRepository;
+    private final MessageRepository messageRepository;
 
-    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysisResultRepository, DoctorRepository doctorRepository, AnnotationRepository annotationRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil) {
+    public DataInitializer(PatientRepository patientRepository, XRayImageRepository xRayImageRepository, AnalysisResultRepository analysisResultRepository, DoctorRepository doctorRepository, AnnotationRepository annotationRepository, AppointmentRepository appointmentRepository, PasswordUtil passwordUtil, ChatRepository chatRepository, MessageRepository messageRepository) {
         this.patientRepository = patientRepository;
         this.xRayImageRepository = xRayImageRepository;
         this.analysisResultRepository = analysisResultRepository;
@@ -42,6 +49,8 @@ public class DataInitializer implements CommandLineRunner {
         this.annotationRepository = annotationRepository;
         this.appointmentRepository = appointmentRepository;
         this.passwordUtil = passwordUtil;
+        this.chatRepository = chatRepository;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -94,5 +103,40 @@ public class DataInitializer implements CommandLineRunner {
         patient2.setDoctors(doctorList);
         patientRepository.saveAll(patientList);
         doctorRepository.saveAll(doctorList);
+
+        // Initialize a chat with users
+        List<User> participants = Arrays.asList(patient1, patient2);
+        Chat chat = new Chat();
+        chat.setParticipants(participants);
+        chatRepository.save(chat);
+
+        // Initialize messages
+        Message message1 = new Message();
+        message1.setAuthor(patient1);
+        message1.setChat(chat);
+        message1.setText("Hello, Jane!");
+        message1.setTimestamp(LocalDateTime.now().minusMinutes(10));
+        messageRepository.save(message1);
+
+        Message message2 = new Message();
+        message2.setAuthor(patient2);
+        message2.setChat(chat);
+        message2.setText("Hi John, how are you?");
+        message2.setTimestamp(LocalDateTime.now().minusMinutes(5));
+        messageRepository.save(message2);
+
+        // Initialize another chat and messages
+        List<User> participants2 = Arrays.asList(patient3, doctor1);
+        Chat chat2 = new Chat();
+        chat2.setParticipants(participants2);
+        chatRepository.save(chat2);
+
+        Message message3 = new Message();
+        message3.setAuthor(patient3);
+        message3.setChat(chat2);
+        message3.setText("Hello Dr. Bob, I have a question.");
+        message3.setTimestamp(LocalDateTime.now().minusMinutes(30));
+        messageRepository.save(message3);
     }
+
 }

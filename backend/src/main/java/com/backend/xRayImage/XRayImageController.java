@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/xray-images")
+@RequestMapping("/xray-images")
 public class XRayImageController {
 
     @Autowired

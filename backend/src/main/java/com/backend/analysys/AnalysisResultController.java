@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/analysis-result")
+@RequestMapping("/analysis-result")
 public class AnalysisResultController {
 
     @Autowired

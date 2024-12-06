@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("/appointment")
 public class AppointmentController {
 
     @Autowired
@@ -15,8 +15,8 @@ public class AppointmentController {
 
     // Get all appointments
     @GetMapping
-    public List<AppointmentDTO> getAllAppointments() {
-        return appointmentService.getAllAppointments();
+    public ResponseEntity<List<AppointmentDTO>> getAllAppointments() {
+        return ResponseEntity.ok( appointmentService.getAllAppointments());
     }
 
     // Get appointment by ID

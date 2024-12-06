@@ -7,14 +7,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/doctor")
+@RequestMapping("/doctor")
 public class DoctorController {
 
     @Autowired
     private DoctorService doctorService;
 
     // Get all doctors
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<DoctorDTO>> getAllDoctors() {
         return ResponseEntity.ok(doctorService.getAllDoctors());
     }
@@ -32,7 +32,7 @@ public class DoctorController {
     }
 
     // Create a new doctor
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<DoctorDTO> createDoctor(@RequestBody DoctorDTO doctorDTO) {
         return ResponseEntity.ok(doctorService.createDoctor(doctorDTO));
     }
@@ -43,11 +43,25 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.updateDoctor(id, doctorDTO));
     }
 
-    @PostMapping("/{doctorId}/patients/{patientId}")
+//    @PostMapping("/{doctorId}/patients/{patientId}")
+//    public ResponseEntity<String> addPatientToDoctor(@PathVariable int doctorId, @PathVariable int patientId) {
+//        doctorService.addPatientToDoctor(doctorId, patientId);
+//        return ResponseEntity.ok("Patient added to doctor successfully.");
+//    }
+
+    @PutMapping("/{doctorId}/patients/{patientId}")
     public ResponseEntity<String> addPatientToDoctor(@PathVariable int doctorId, @PathVariable int patientId) {
         doctorService.addPatientToDoctor(doctorId, patientId);
         return ResponseEntity.ok("Patient added to doctor successfully.");
     }
+
+
+    @DeleteMapping("/{doctorId}/patients/{patientId}")
+    public ResponseEntity<String> removePatientFromDoctor(@PathVariable int doctorId, @PathVariable int patientId) {
+        doctorService.removePatientFromDoctor(doctorId, patientId);
+        return ResponseEntity.ok("Patient removed from doctor successfully.");
+    }
+
 
 
     // Delete doctor by ID

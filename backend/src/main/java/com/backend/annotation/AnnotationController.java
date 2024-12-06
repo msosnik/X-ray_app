@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/annotations")
+@RequestMapping("/annotation")
 public class AnnotationController {
 
     @Autowired
@@ -35,6 +35,12 @@ public class AnnotationController {
     public ResponseEntity<JsonNode> getAnnotationJsonDataById(@PathVariable int id) {
         JsonNode jsonData = annotationService.getAnnotationJsonDataById(id);
         return ResponseEntity.ok(jsonData);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AnnotationDTO> updateAnnotation(@PathVariable int id, @RequestBody AnnotationDTO annotationDTO) {
+        AnnotationDTO updatedAnnotation = annotationService.updateAnnotation(id, annotationDTO);
+        return ResponseEntity.ok(updatedAnnotation);
     }
 
     @DeleteMapping("/{id}")

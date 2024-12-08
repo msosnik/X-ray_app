@@ -7,15 +7,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/patient")
+@RequestMapping("/patient")
 public class PatientController {
 
     @Autowired
     private PatientService patientService;
 
-    @GetMapping
-    public List<PatientDTO> getAllPatients() {
-        return patientService.getAllPatients();
+    @GetMapping("/")
+    public ResponseEntity<List<PatientDTO>> getAllPatients() {
+        try {
+            return ResponseEntity.ok(patientService.getAllPatients());
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -35,7 +39,7 @@ public class PatientController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<PatientDTO> createPatient(@RequestBody PatientDTO patientDTO) {
         PatientDTO createdPatient = patientService.createPatient(patientDTO);
         return ResponseEntity.ok(createdPatient);

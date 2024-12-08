@@ -32,7 +32,8 @@ public class Doctor extends User {
     @JoinTable(
             name = "doctor_patient", // Name of the join table
             joinColumns = @JoinColumn(name = "doctor_id"),
-            inverseJoinColumns = @JoinColumn(name = "patient_id")
+            inverseJoinColumns = @JoinColumn(name = "patient_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"doctor_id", "patient_id"})
     )
     private List<Patient> patients;
 

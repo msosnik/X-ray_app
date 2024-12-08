@@ -26,7 +26,7 @@ public class MessageService {
     public List<MessageDTO> getMessagesByChatId(Integer chatId) {
         List<Message> messages = messageRepository.findByChat_Id(chatId);
         return messages.stream()
-                .map(msg -> new MessageDTO(msg.getId(), msg.getAuthor().getId(), msg.getChat().getId(), msg.getText(), msg.getTimestamp()))
+                .map(msg -> new MessageDTO(msg.getAuthor().getId(), msg.getChat().getId(), msg.getText(), msg.getTimestamp()))
                 .collect(Collectors.toList());
     }
 
@@ -40,7 +40,7 @@ public class MessageService {
         message.setTimestamp(LocalDateTime.now());
 
         Message savedMessage = messageRepository.save(message);
-        return new MessageDTO(savedMessage.getId(), author.getId(), chat.getId(), savedMessage.getText(), savedMessage.getTimestamp());
+        return new MessageDTO(author.getId(), chat.getId(), savedMessage.getText(), savedMessage.getTimestamp());
     }
 
     public Message getMessageById(Integer id) {

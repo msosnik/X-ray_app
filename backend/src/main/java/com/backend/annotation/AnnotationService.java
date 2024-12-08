@@ -2,11 +2,13 @@ package com.backend.annotation;
 
 import com.backend.analysys.AnalysisResultRepository;
 import com.backend.doctor.DoctorRepository;
+import com.backend.exception.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,6 +80,22 @@ public class AnnotationService {
             throw new RuntimeException("Error parsing JSON data", e);
         }
     }
+
+    public AnnotationDTO updateAnnotation(int id, AnnotationDTO annotationDTO) {
+        Annotation annotation = annotationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Annotation not found with ID: " + id));
+
+        annotation.setAnnotationData(annotationDTO.getAnnotationData());
+        annotation.setDoctor(doctorRepository.findById(annotationDTO.getDoctorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found")));
+        annotation.setAnalysisResult(analysisResultRepository.findById(annotationDTO.getAnalysisResultId())
+                .orElseThrow(() -> new ResourceNotFoundException("Analysis result not found")));
+        annotation.setCreatedAt(LocalDateTime.now());
+
+        Annotation updatedAnnotation = annotationRepository.save(annotation);
+        return convertToDTO(updatedAnnotation);
+    }
+
 
     public void deleteAnnotation(int id) {
         annotationRepository.deleteById(id);

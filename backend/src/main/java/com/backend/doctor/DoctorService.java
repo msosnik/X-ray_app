@@ -180,4 +180,18 @@ public class DoctorService {
         doctorRepository.save(doctor);
         patientRepository.save(patient);
     }
+
+    public void removePatientFromDoctor(int doctorId, int patientId) {
+        Doctor doctor = doctorRepository.findDoctorById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + doctorId));
+
+        Patient patient = patientRepository.findPatientById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + patientId));
+
+        doctor.getPatients().remove(patient);
+        patient.getDoctors().remove(doctor);
+        doctorRepository.save(doctor);
+        patientRepository.save(patient);
+    }
+
 }

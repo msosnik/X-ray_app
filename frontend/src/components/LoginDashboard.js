@@ -20,7 +20,7 @@ const LoginDashboard = ({ onLogin }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:8080/login', {
+      const loginResponse = await fetch('http://localhost:8080/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,31 +29,50 @@ const LoginDashboard = ({ onLogin }) => {
         body: JSON.stringify(loginRequest)
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      // console.log('Response status:', response.status);
+      // console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-      if (!response.ok) {
-        const errorText = await response.text();
+      if (!loginResponse.ok) {
+        const errorText = await loginResponse.text();
         throw new Error(errorText || 'Login failed');
       }
 
-      const responseText = await response.text();
+      const loginResponseText = await loginResponse.text();
 
-      if (responseText.includes('Login successful')) {
+      const roleMatch = loginResponseText.match(/Login successful for user: (\w+)/);
+      const backendRole = roleMatch ? roleMatch[1].toLowerCase() : null;
+
+      const role = backendRole || selectedRole;
+
+      if (loginResponseText.includes('Login successful')) {
         // localStorage.setItem('userEmail', email);
         // localStorage.setItem('userRole', selectedRole);
-        onLogin(email, password, selectedRole);
+        const endpoint = role === 'patient' ? 'patient' : 'doctor';
 
-        
-        switch(selectedRole) {
-          case 'patient':
-            window.location.href = '/patient-dashboard';
-            break;
-          case 'doctor':
-            window.location.href = '/doctor-dashboard';
-            break;
-          default:
-            window.location.href = '/dashboard';
+        const usersResponse = await fetch(`http://localhost:8080/${endpoint}/`);
+      
+        if (!usersResponse.ok) {
+          throw new Error(`Failed to fetch ${endpoint} information`);
+        }
+
+        const users = await usersResponse.json();
+        const currentUser = users.find(user => user.email === email);
+
+        if (currentUser) {
+          onLogin(email, password, role, currentUser);
+          
+          switch(role) {
+            case 'patient':
+              window.location.href = '/patient-dashboard';
+              break;
+            case 'doctor':
+              window.location.href = '/doctor-dashboard';
+              break;
+            default:
+              window.location.href = '/dashboard';
+          }
+        } else {
+          setError('User information not found');
         }
       } else {
         setError('Login failed. Please check your credentials.');

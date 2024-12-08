@@ -14,7 +14,7 @@ import {
 import 'stream-chat-react/dist/css/index.css';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 
-const PatientDashboard = () => {
+const PatientDashboard = ({ onLogout }) => {
   const [tabContent, setTabContent] = useState('home');
   const [activeTab, setActiveTab] = useState('home');
   const [activeDoctor, setActiveDoctor] = useState(null);
@@ -90,7 +90,12 @@ const PatientDashboard = () => {
   };
 
   const handleLogout = () => {
-    window.location.href = '/login';
+    if (onLogout) {
+      onLogout();
+    }
+
+    // window.location.href = '/login';
+    navigate('/login');
   };
 
   const handleImageUpload = (event) => {

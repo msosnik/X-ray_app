@@ -4,20 +4,18 @@ import { LogIn, UserPlus, ChevronDown } from 'lucide-react';
 import '../styles/loginDashboard.css';
 
 const LoginDashboard = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState('patient');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    // onLogin(username, password, selectedRole);
     setError('');
     setIsLoading(true);
 
-    // Prepare login request
     const loginRequest = {
-      email: username,
+      email: email,
       password: password
     };
 
@@ -31,22 +29,22 @@ const LoginDashboard = ({ onLogin }) => {
         body: JSON.stringify(loginRequest)
       });
 
-      // Parse response
-      const data = await response.json();
-
-      console.log('Full response:', response);
-      console.log('Response data:', data);
-
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
-      // Check response status
-      if (response.ok && data.token) {
-        // Successful login
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('userRole', selectedRole);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Login failed');
+      }
+
+      const responseText = await response.text();
+
+      if (responseText.includes('Login successful')) {
+        // localStorage.setItem('userEmail', email);
+        // localStorage.setItem('userRole', selectedRole);
+        onLogin(email, password, selectedRole);
+
         
-        // Redirect based on role or update app state
         switch(selectedRole) {
           case 'patient':
             window.location.href = '/patient-dashboard';
@@ -58,11 +56,9 @@ const LoginDashboard = ({ onLogin }) => {
             window.location.href = '/dashboard';
         }
       } else {
-        // Handle login error
-        setError(data.message || 'Login failed. Please check your credentials.');
+        setError('Login failed. Please check your credentials.');
       }
     } catch (err) {
-      // Network or other errors
       console.error('Detailed error:', err);
       setError(err.message || 'An error occurred');
     } finally {
@@ -91,10 +87,10 @@ const LoginDashboard = ({ onLogin }) => {
         <div className="login-form">
           <div className="input-field">
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
               disabled={isLoading}
             />
           </div>
@@ -157,7 +153,7 @@ const LoginDashboard = ({ onLogin }) => {
 };
 
 LoginDashboard.propTypes = {
-  onLogin: PropTypes.func
+  onLogin: PropTypes.func.isRequired
 };
 
 export default LoginDashboard;

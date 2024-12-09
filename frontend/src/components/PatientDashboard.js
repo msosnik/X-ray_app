@@ -26,6 +26,7 @@ const PatientDashboard = ({ onLogout }) => {
   const fileInputRef = useRef(null);
   const [videoCall, setVideoCall] = useState(null);
   const [streamVideoClient, setStreamVideoClient] = useState(null);
+  const [selectedBodyPart, setSelectedBodyPart] = useState('Chest');
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
   const USER_ID = 'patient_john_doe';
@@ -94,21 +95,66 @@ const PatientDashboard = ({ onLogout }) => {
       onLogout();
     }
 
-    // window.location.href = '/login';
     navigate('/login');
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setUploadedImage(reader.result);
-        setProcessedImage('Processed image will be shown here after backend processing');
-      };
-      reader.readAsDataURL(file);
+    const imageMetadata = {
+        patientId: 1,
+        bodyPart: selectedBodyPart,
+        uploadDate: "2023-10-01",
+        imagePath: "wololo",
+    };
+
+    if (file && file.type.startsWith("image/")) {
+        try {
+            console.log("Uploading full image:", {
+                metadata: imageMetadata,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+            });
+
+            const formData = new FormData();
+            formData.append(
+                "data",
+                new Blob([JSON.stringify(imageMetadata)], { type: "application/json" })
+            );
+            formData.append("file", file);
+
+            const response = await fetch("http://localhost:8080/xray-images/full", {
+                method: "POST",
+                body: formData,
+            });
+
+            console.log("Response details:", {
+                status: response.status,
+                statusText: response.statusText,
+                headers: Object.fromEntries(response.headers),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Upload failed: ${response.status}`);
+            }
+
+            const responseData = await response.json();
+            console.log("Uploaded full X-ray image response:", responseData);
+
+            const imageUrl = URL.createObjectURL(file);
+            setUploadedImage(imageUrl);
+
+            alert("Full image upload successful!");
+        } catch (error) {
+            console.error("Full upload error details:", {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+            });
+            alert(`Full upload failed: ${error.message}`);
+        }
     } else {
-      alert('Please upload a valid image file');
+        alert("Please upload a valid image file");
     }
   };
 
@@ -146,12 +192,12 @@ const PatientDashboard = ({ onLogout }) => {
     <div className="upload-xray">
       <div className="body-part-selection">
         <label htmlFor="bodyPart">Body part:</label>
-        <select id="bodyPart">
-          <option value="chest">Chest</option>
-          <option value="hand">Hand</option>
-          <option value="foot">Foot</option>
-          <option value="skull">Skull</option>
-          <option value="spine">Spine</option>
+        <select id="bodyPart" value={selectedBodyPart} onChange={(e) => setSelectedBodyPart(e.target.value)}>
+          <option value="Chest">Chest</option>
+          <option value="Hand">Hand</option>
+          <option value="Foot">Foot</option>
+          <option value="Skull">Skull</option>
+          <option value="Spine">Spine</option>
         </select>
       </div>
       <div className="xray-content">

@@ -405,6 +405,25 @@ button:disabled {
     background-color: #4A4459;
 }
 
+.analysis-details {
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+.analysis-details h4 {
+    font-size: 28px;
+}
+
+.abnormalities-section ul {
+    list-style-position: inside;
+    padding-left: 0;
+    margin-left: 0;
+}
+  
+.abnormalities-section li {
+    padding-left: 0;
+}
+
 .messages-container {
     display: flex;
     height: 100%;

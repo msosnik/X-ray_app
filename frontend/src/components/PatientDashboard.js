@@ -26,6 +26,7 @@ const PatientDashboard = ({ onLogout }) => {
   const fileInputRef = useRef(null);
   const [videoCall, setVideoCall] = useState(null);
   const [streamVideoClient, setStreamVideoClient] = useState(null);
+  const [selectedBodyPart, setSelectedBodyPart] = useState('Chest');
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
   const USER_ID = 'patient_john_doe';
@@ -94,22 +95,124 @@ const PatientDashboard = ({ onLogout }) => {
       onLogout();
     }
 
-    // window.location.href = '/login';
     navigate('/login');
   };
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setUploadedImage(reader.result);
-        setProcessedImage('Processed image will be shown here after backend processing');
-      };
-      reader.readAsDataURL(file);
+
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    const imageMetadata = {
+        patientId: 1,
+        bodyPart: selectedBodyPart,
+        uploadDate: currentDate,
+        imagePath: "wololo",
+    };
+
+    if (file && file.type.startsWith("image/")) {
+        try {
+            console.log("Uploading full image:", {
+                metadata: imageMetadata,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+            });
+
+            const formData = new FormData();
+            formData.append(
+                "data",
+                new Blob([JSON.stringify(imageMetadata)], { type: "application/json" })
+            );
+            formData.append("file", file);
+
+            const uploadResponse = await fetch("http://localhost:8080/xray-images/full", {
+                method: "POST",
+                body: formData,
+            });
+
+            console.log("Response details:", {
+                status: uploadResponse.status,
+                statusText: uploadResponse.statusText,
+                headers: Object.fromEntries(uploadResponse.headers),
+            });
+
+            if (!uploadResponse.ok) {
+                throw new Error(`Upload failed: ${uploadResponse.status}`);
+            }
+
+            const uploadResponseData = await uploadResponse.json();
+            console.log("Uploaded full X-ray image response:", uploadResponseData);
+
+            const imageId = 1;
+
+            const analysisResponse = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
+
+            if (!analysisResponse.ok) {
+              throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
+            }
+
+            const analysisData = await analysisResponse.json();
+
+            const imageUrl = URL.createObjectURL(file);
+            setUploadedImage(imageUrl);
+
+            setProcessedImage(analysisData);
+
+            alert("Full image upload successful!");
+        } catch (error) {
+            console.error("Full upload error details:", {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+            });
+            setProcessedImage(`Analysis failed: ${error.message}`);
+            alert(`Full upload failed: ${error.message}`);
+        }
     } else {
-      alert('Please upload a valid image file');
+        alert("Please upload a valid image file");
     }
+  };
+
+  const renderAnalysisResults = (analysisData) => {
+    const {
+      detectedAbnormalities,
+      analysisDate,
+      doctorReviewed,
+      doctorComments
+    } = analysisData;
+  
+    return (
+      <div className="analysis-details">
+        <h4>X-Ray Analysis</h4>
+        <p><strong>Date:</strong> {analysisDate}</p>
+        
+        <div className="abnormalities-section">
+          <strong>Detected Abnormalities:</strong>
+          {detectedAbnormalities && detectedAbnormalities.length > 0 ? (
+            <ul className="abnormalities-list">
+              {detectedAbnormalities.map((abnormality, index) => (
+                <li key={index}>{abnormality.replace(/^\s+/, '')}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No abnormalities detected</p>
+          )}
+        </div>
+  
+        <div className="doctor-review-section">
+          <strong>Doctor Review Status:</strong>
+          <p>{doctorReviewed ? 'Reviewed' : 'Pending Review'}</p>
+          
+          {doctorComments && (
+            <div className="doctor-comments">
+              <strong>Doctor Comments:</strong>
+              <p>{doctorComments}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const showAppointmentsTab = () => (
@@ -146,12 +249,12 @@ const PatientDashboard = ({ onLogout }) => {
     <div className="upload-xray">
       <div className="body-part-selection">
         <label htmlFor="bodyPart">Body part:</label>
-        <select id="bodyPart">
-          <option value="chest">Chest</option>
-          <option value="hand">Hand</option>
-          <option value="foot">Foot</option>
-          <option value="skull">Skull</option>
-          <option value="spine">Spine</option>
+        <select id="bodyPart" value={selectedBodyPart} onChange={(e) => setSelectedBodyPart(e.target.value)}>
+          <option value="Chest">Chest</option>
+          <option value="Hand">Hand</option>
+          <option value="Foot">Foot</option>
+          <option value="Skull">Skull</option>
+          <option value="Spine">Spine</option>
         </select>
       </div>
       <div className="xray-content">
@@ -200,15 +303,9 @@ const PatientDashboard = ({ onLogout }) => {
           <h3>Results</h3>
           <div id="processedImage" className="xray-image">
             {processedImage ? (
-              typeof processedImage === 'string' ? (
-                <div className="processing-message">{processedImage}</div>
-              ) : (
-                <img 
-                  src={processedImage} 
-                  alt="Processed X-Ray" 
-                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
-                />
-              )
+              <div className="analysis-results">
+                {renderAnalysisResults(processedImage)}
+              </div>
             ) : (
               <div className="placeholder-message">Upload an image to see results</div>
             )}
@@ -299,7 +396,6 @@ const PatientDashboard = ({ onLogout }) => {
       initStreamVideoClient();
     }
 
-    // Cleanup
     return () => {
       if (streamVideoClient) {
         streamVideoClient.disconnectUser();

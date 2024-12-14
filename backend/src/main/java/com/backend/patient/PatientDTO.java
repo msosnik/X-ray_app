@@ -12,6 +12,8 @@ import java.util.List;
 @Data
 public class PatientDTO {
 
+    private int id;
+
     private String email;
     
     private String passwordHash;

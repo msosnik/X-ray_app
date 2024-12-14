@@ -1,4 +1,5 @@
 package com.backend.message;
+
 import com.backend.chat.Chat;
 import com.backend.chat.ChatRepository;
 import com.backend.exception.ResourceNotFoundException;
@@ -7,7 +8,6 @@ import com.backend.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,29 +23,45 @@ public class MessageService {
     @Autowired
     private ChatRepository chatRepository;
 
+    private MessageDTO convertToDTO(Message message) {
+        return new MessageDTO(
+                message.getId(),
+                message.getAuthor().getId(),
+                message.getChat().getId(),
+                message.getText(),
+                message.getTimestamp()
+        );
+    }
+
+    private Message convertToEntity(MessageDTO dto) {
+        User author = userRepository.findById(dto.getAuthorId()).orElseThrow(()-> new ResourceNotFoundException("no User with id: " + dto.getAuthorId()) );
+        Chat chat = chatRepository.findById(dto.getChatId()).orElseThrow(()->new ResourceNotFoundException("no Chat with id: "+dto.getChatId()));
+        return new Message(
+                dto.getId(),
+                author,
+                chat,
+                dto.getText(),
+                dto.getTimestamp()
+        );
+    }
+
     public List<MessageDTO> getMessagesByChatId(Integer chatId) {
         List<Message> messages = messageRepository.findByChat_Id(chatId);
         return messages.stream()
-                .map(msg -> new MessageDTO(msg.getAuthor().getId(), msg.getChat().getId(), msg.getText(), msg.getTimestamp()))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     public MessageDTO createMessage(MessageDTO messageDTO) {
-        User author = userRepository.findById(messageDTO.getAuthorId()).orElseThrow(() -> new RuntimeException("User not found"));
-        Chat chat = chatRepository.findById(messageDTO.getChatId()).orElseThrow(() -> new RuntimeException("Chat not found"));
-        Message message = new Message();
-        message.setAuthor(author);
-        message.setChat(chat);
-        message.setText(message.getText());
-        message.setTimestamp(LocalDateTime.now());
-
-        Message savedMessage = messageRepository.save(message);
-        return new MessageDTO(author.getId(), chat.getId(), savedMessage.getText(), savedMessage.getTimestamp());
+        Message savedMessage = convertToEntity(messageDTO);
+        messageRepository.save(savedMessage);
+        return convertToDTO(savedMessage);
     }
 
-    public Message getMessageById(Integer id) {
-        return messageRepository.findById(id).orElseThrow(
+    public MessageDTO getMessageById(Integer id) {
+        Message message = messageRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Message not found with id: " + id));
+        return convertToDTO(message);
     }
 }
 

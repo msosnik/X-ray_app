@@ -27,6 +27,10 @@ const PatientDashboard = ({ onLogout }) => {
   const [videoCall, setVideoCall] = useState(null);
   const [streamVideoClient, setStreamVideoClient] = useState(null);
   const [selectedBodyPart, setSelectedBodyPart] = useState('Chest');
+  const [appointments, setAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const patientId = 1;
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
   const USER_ID = 'patient_john_doe';
@@ -37,12 +41,6 @@ const PatientDashboard = ({ onLogout }) => {
     firstName: "John",
     lastName: "Doe",
   };
-
-  const [appointments, setAppointments] = useState([
-    { id: 1, doctor: "Dr. Jane Smith", date: "2024-10-05", time: "14:00" },
-    { id: 2, doctor: "Dr. Michael Johnson", date: "2024-10-10", time: "10:30" },
-    { id: 3, doctor: "Dr. Emily Brown", date: "2024-10-15", time: "16:15" }
-  ]);
 
   const doctors = [
     { id: 1, name: "Dr. Jane Smith" },
@@ -75,6 +73,81 @@ const PatientDashboard = ({ onLogout }) => {
       </div>
     </div>
   );
+  
+  const fetchAppointments = async () => {
+    try {
+      setIsLoading(true);
+      const appointmentsResponse = await fetch(`http://localhost:8080/appointment/patient/${patientId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!appointmentsResponse.ok) {
+        throw new Error('Failed to fetch appointments');
+      }
+
+      const appointmentsData = await appointmentsResponse.json();
+
+      const formattedAppointments = await Promise.all(
+        appointmentsData.map(async (appointment) => {
+          try {
+            const doctorResponse = await fetch(`http://localhost:8080/doctor/${appointment.doctorId}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            });
+
+            if (!doctorResponse.ok) {
+              throw new Error(`Failed to fetch doctor ${appointment.doctorId}`);
+            }
+
+            const doctorData = await doctorResponse.json();
+            return {
+              id: appointment.id,
+              doctor: `Dr. ${doctorData.passwordHash} ${doctorData.lastName}`,
+              status: appointment.status || 'SCHEDULED',
+              date: new Date(appointment.appointmentDateTime).toISOString().split('T')[0],
+              time: new Date(appointment.appointmentDateTime).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }),
+              originalData: appointment
+            };
+          } catch (doctorError) {
+            console.error(`Error fetching doctor ${appointment.doctorId}:`, doctorError);
+            
+            return {
+              id: appointment.id,
+              doctor: 'Unknown Doctor',
+              status: appointment.status || 'SCHEDULED',
+              date: new Date(appointment.appointmentDateTime).toISOString().split('T')[0],
+              time: new Date(appointment.appointmentDateTime).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }),
+              originalData: appointment
+            };
+          }
+        })
+      );
+
+      setAppointments(formattedAppointments);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      setError('Failed to load appointments');
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchAppointments();
+  }, [patientId]);
 
   const handleEditAppointment = (id) => {
     alert(`Editing appointment with ID: ${id}`);
@@ -220,7 +293,8 @@ const PatientDashboard = ({ onLogout }) => {
       <div className="appointments-list">
         {appointments.map(app => (
           <div className="appointment-item" key={app.id}>
-            <div>{app.doctor}</div>
+            <div className="doctor-name">{app.doctor}</div>
+            <div className="appointment-status"> {app.status}</div>
             <div className="date-time">{app.date} {app.time}</div>
             <div className="appointment-actions">
               <button onClick={() => handleEditAppointment(app.id)}>Edit</button>

@@ -122,7 +122,7 @@ const LoginDashboard = ({ onLogin }) => {
               disabled={isLoading}
             />
           </div>
-          <div className="input-field role-selection">
+          {/* <div className="input-field role-selection">
             <label htmlFor="roleSelect">Role:</label>
             <select 
               id="roleSelect" 
@@ -134,7 +134,7 @@ const LoginDashboard = ({ onLogin }) => {
               <option value="patient">Patient</option>
               <option value="doctor">Doctor</option>
             </select>
-          </div>
+          </div> */}
           <div className="button-group">
             <button 
               className="register-button" 

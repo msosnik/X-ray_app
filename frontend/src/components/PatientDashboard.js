@@ -153,9 +153,26 @@ const PatientDashboard = ({ onLogout }) => {
     alert(`Editing appointment with ID: ${id}`);
   };
 
-  const handleDeleteAppointment = (id) => {
-    setAppointments(appointments.filter(app => app.id !== id));
-    alert(`Appointment with ID: ${id} has been deleted`);
+  const handleDeleteAppointment = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/appointment/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete appointment');
+      }
+  
+      setAppointments(appointments.filter(app => app.id !== id));
+      
+      alert('Appointment successfully deleted');
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      alert(`Failed to delete appointment: ${error.message}`);
+    }
   };
 
   const handleProfileClick = () => {

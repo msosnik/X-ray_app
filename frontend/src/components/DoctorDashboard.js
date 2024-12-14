@@ -14,7 +14,7 @@ import {
   ParticipantView,
 } from '@stream-io/video-react-sdk';
 
-const DoctorDashboard = () => {
+const DoctorDashboard = ({ onLogout }) => {
   const [tabContent, setTabContent] = useState('home');
   const [activeTab, setActiveTab] = useState('home');
   const [activePatient, setActivePatient] = useState(null);
@@ -381,7 +381,12 @@ const DoctorDashboard = () => {
   };
 
   const handleLogout = () => {
-    window.location.href = '/login';
+    if (onLogout) {
+      onLogout();
+    }
+
+    // window.location.href = '/login';
+    navigate('/login');
   };
 
   const renderTabContent = () => {

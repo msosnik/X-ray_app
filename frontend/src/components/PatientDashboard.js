@@ -437,7 +437,6 @@ const PatientDashboard = ({ onLogout }) => {
         ))}
       </div>
       <div className="create-appointment">
-        <h3>Create New Appointment</h3>
         <form onSubmit={handleCreateAppointment}>
           <div>
             <label htmlFor="doctorSelect">Select Doctor:</label>
@@ -453,7 +452,7 @@ const PatientDashboard = ({ onLogout }) => {
               <option value="">Select a Doctor</option>
               {doctors.map(doctor => (
                 <option key={doctor.id} value={doctor.id}>
-                  {doctor.name} - {doctor.specialization} ({doctor.availability})
+                  {doctor.firstName} {doctor.lastName} - {doctor.specialization} ({doctor.availability})
                 </option>
               ))}
             </select>

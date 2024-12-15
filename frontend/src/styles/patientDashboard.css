@@ -272,6 +272,37 @@ button:disabled {
     background-color: #9e9e9e;
 }
 
+.create-appointment {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.create-appointment form {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+}
+
+.create-appointment div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#doctorSelect,
+#appointmentDateTime {
+    padding: 1vh 1vw;
+    font-size: 1vw;
+    border-radius: 10px;
+    border: 1px solid #65558F;
+    background-color: white;
+    color: #65558F;
+    cursor: pointer;
+    width: 200px;
+}
+
 .upload-xray {
     display: flex;
     flex-direction: column;

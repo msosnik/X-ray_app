@@ -283,53 +283,107 @@ button:disabled {
 }
 
 .appointment-item {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    display: grid !important;
+    grid-template-columns: 0.5fr 0.5fr 0.5fr 0.5fr !important;
     align-items: center;
     background-color: #f0e6ff;
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 15px;
     gap: 15px;
+    min-height: 20px;
+    white-space: nowrap;
 }
 
-.appointment-info {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.patient-name {
-    font-weight: bold;
+.appointment-item > div {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 1.1em;
 }
 
-.appointment-reason {
-    color: #65558F;
-    font-size: 0.9em;
+.appointment-item .patient-name {
+    text-align: left;
 }
 
-.date-time {
+.appointment-item .appointment-status {
     text-align: center;
-    color: #65558F;
 }
 
-.appointment-actions {
+.appointment-item .date-time {
+    text-align: center;
+}
+
+.appointment-item .appointment-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 10px;
+    align-items: center;
 }
 
 .appointment-actions button {
-    background: #65558F;
-    color: white;
+    padding: 6px 12px;
     border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9em;
+    border-radius: 5px;
+    background-color: #65558F;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .appointment-actions button:hover {
     background: #4A4459;
+}
+
+.create-appointment button {
+    background-color: #65558F;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.2vw;
+    margin-top: 25px;
+}
+
+.create-appointment button:hover {
+    background-color: #4A4459;
+}
+
+.create-appointment button:disabled {
+    background-color: #9e9e9e;
+}
+
+.create-appointment {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.create-appointment form {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+}
+
+.create-appointment div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#patientSelect,
+#appointmentDateTime {
+    padding: 1vh 1vw;
+    font-size: 1vw;
+    border-radius: 10px;
+    border: 1px solid #65558F;
+    background-color: white;
+    color: #65558F;
+    cursor: pointer;
+    width: 250px;
 }
 
 .upload-xray {
@@ -561,6 +615,12 @@ button:disabled {
     background: #f0e6ff;
     border-radius: 10px;
     margin-bottom: 15px;
+}
+
+.patient-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #65558F;
 }
 
 .chat-messages {

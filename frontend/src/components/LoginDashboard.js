@@ -39,10 +39,10 @@ const LoginDashboard = ({ onLogin }) => {
 
       const loginResponseText = await loginResponse.text();
 
-      const roleMatch = loginResponseText.match(/Login successful for user: (\w+)/);
-      const backendRole = roleMatch ? roleMatch[1].toLowerCase() : null;
+      const roleMatch = loginResponseText.match(/Login successful for user: (\w+)(\d+)/);
 
-      const role = backendRole || selectedRole;
+      const role = roleMatch[1].toLowerCase();
+      const userId = parseInt(roleMatch[2]);
 
       if (loginResponseText.includes('Login successful')) {
         // localStorage.setItem('userEmail', email);
@@ -59,8 +59,10 @@ const LoginDashboard = ({ onLogin }) => {
         const currentUser = users.find(user => user.email === email);
 
         if (currentUser) {
-          onLogin(email, password, role, currentUser);
-          
+          onLogin(email, password, role, {
+            ...currentUser,
+            id: userId
+          });          
           switch(role) {
             case 'patient':
               window.location.href = '/patient-dashboard';
@@ -122,7 +124,7 @@ const LoginDashboard = ({ onLogin }) => {
               disabled={isLoading}
             />
           </div>
-          <div className="input-field role-selection">
+          {/* <div className="input-field role-selection">
             <label htmlFor="roleSelect">Role:</label>
             <select 
               id="roleSelect" 
@@ -134,7 +136,7 @@ const LoginDashboard = ({ onLogin }) => {
               <option value="patient">Patient</option>
               <option value="doctor">Doctor</option>
             </select>
-          </div>
+          </div> */}
           <div className="button-group">
             <button 
               className="register-button" 

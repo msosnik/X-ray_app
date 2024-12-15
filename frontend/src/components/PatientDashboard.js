@@ -27,30 +27,29 @@ const PatientDashboard = ({ onLogout }) => {
   const [videoCall, setVideoCall] = useState(null);
   const [streamVideoClient, setStreamVideoClient] = useState(null);
   const [selectedBodyPart, setSelectedBodyPart] = useState('Chest');
+  const [appointments, setAppointments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [doctors, setDoctors] = useState([]);
+  const storedUserData = JSON.parse(localStorage.getItem('userInfo'));
+  const [patientId, setPatientId] = useState(storedUserData?.id || null);
+  const [userData, setUserData] = useState({
+    firstName: storedUserData?.firstName || 'User',
+    lastName: storedUserData?.lastName || '',
+    email: storedUserData?.email || '',
+  });
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
   const USER_ID = 'patient_john_doe';
   const USER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicGF0aWVudF9qb2huX2RvZSJ9.placeholder_patient_token';
   const CONSULTATION_ROOM_ID = 'consultation_room';
 
-  const userData = {
-    firstName: "John",
-    lastName: "Doe",
-  };
-
-  const [appointments, setAppointments] = useState([
-    { id: 1, doctor: "Dr. Jane Smith", date: "2024-10-05", time: "14:00" },
-    { id: 2, doctor: "Dr. Michael Johnson", date: "2024-10-10", time: "10:30" },
-    { id: 3, doctor: "Dr. Emily Brown", date: "2024-10-15", time: "16:15" }
-  ]);
-
-  const doctors = [
-    { id: 1, name: "Dr. Jane Smith" },
-    { id: 2, name: "Dr. Michael Johnson" },
-    { id: 3, name: "Dr. Emily Brown" },
-    { id: 4, name: "Dr. David Lee" },
-    { id: 5, name: "Dr. Sarah Wilson" }
-  ];
+  const [newAppointment, setNewAppointment] = useState({
+    patientId: patientId,
+    doctorId: null,
+    appointmentDateTime: '',
+    status: 'SCHEDULED'
+  });
 
   const chatMessages = {
     1: [
@@ -75,15 +74,222 @@ const PatientDashboard = ({ onLogout }) => {
       </div>
     </div>
   );
+  
+  const fetchAppointments = async () => {
+    try {
+      setIsLoading(true);
+      const appointmentsResponse = await fetch(`http://localhost:8080/appointment/patient/${patientId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!appointmentsResponse.ok) {
+        throw new Error('Failed to fetch appointments');
+      }
+
+      const appointmentsData = await appointmentsResponse.json();
+
+      const formattedAppointments = await Promise.all(
+        appointmentsData.map(async (appointment) => {
+          try {
+            const doctorResponse = await fetch(`http://localhost:8080/doctor/${appointment.doctorId}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            });
+
+            if (!doctorResponse.ok) {
+              throw new Error(`Failed to fetch doctor ${appointment.doctorId}`);
+            }
+
+            const doctorData = await doctorResponse.json();
+            return {
+              id: appointment.id,
+              doctor: `Dr. ${doctorData.passwordHash} ${doctorData.lastName}`,
+              status: appointment.status || 'SCHEDULED',
+              date: new Date(appointment.appointmentDateTime).toISOString().split('T')[0],
+              time: new Date(appointment.appointmentDateTime).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }),
+              originalData: appointment
+            };
+          } catch (doctorError) {
+            console.error(`Error fetching doctor ${appointment.doctorId}:`, doctorError);
+            
+            return {
+              id: appointment.id,
+              doctor: 'Unknown Doctor',
+              status: appointment.status || 'SCHEDULED',
+              date: new Date(appointment.appointmentDateTime).toISOString().split('T')[0],
+              time: new Date(appointment.appointmentDateTime).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              }),
+              originalData: appointment
+            };
+          }
+        })
+      );
+
+      setAppointments(formattedAppointments);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      setError('Failed to load appointments');
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    if (patientId) {
+      fetchAppointments();
+    }
+  }, [patientId]);
 
   const handleEditAppointment = (id) => {
     alert(`Editing appointment with ID: ${id}`);
   };
 
-  const handleDeleteAppointment = (id) => {
-    setAppointments(appointments.filter(app => app.id !== id));
-    alert(`Appointment with ID: ${id} has been deleted`);
+  const handleDeleteAppointment = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/appointment/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to delete appointment');
+      }
+  
+      setAppointments(appointments.filter(app => app.id !== id));
+      
+      alert('Appointment successfully deleted');
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      alert(`Failed to delete appointment: ${error.message}`);
+    }
   };
+
+  const handleCreateAppointment = async (e) => {
+    e.preventDefault();
+  
+    try {
+      if (!newAppointment.doctorId || !newAppointment.appointmentDateTime) {
+        alert('Please select a doctor and appointment time');
+        return;
+      }
+
+      const selectedDoctor = doctors.find(d => d.id === newAppointment.doctorId);
+
+      const appointmentDateTimeLocal = new Date(newAppointment.appointmentDateTime);
+
+      const appointmentDateTimeUTC = new Date(
+        appointmentDateTimeLocal.getTime() - appointmentDateTimeLocal.getTimezoneOffset() * 60000
+      );
+
+      const appointmentData = {
+        id: 0,
+        patientId: patientId,
+        doctorId: newAppointment.doctorId,
+        appointmentDateTime: appointmentDateTimeUTC.toISOString(),
+        status: "SCHEDULED",
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0]
+      };
+
+      console.log('Appointment Creation Payload:', JSON.stringify(appointmentData, null, 2));
+  
+      const response = await fetch('http://localhost:8080/appointment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData)
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
+  
+      const createdAppointment = await response.json();
+  
+      const appointmentDateLocal = new Date(createdAppointment.appointmentDateTime);
+      const formattedDate = appointmentDateLocal.toISOString().split('T')[0];
+      const formattedTime = appointmentDateLocal.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+  
+      const formattedAppointment = {
+        id: createdAppointment.id,
+        doctor: selectedDoctor 
+          ? `Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName}` 
+          : 'Unknown Doctor',
+        status: createdAppointment.status || 'SCHEDULED',
+        date: formattedDate,
+        time: formattedTime,
+        originalData: createdAppointment
+      };
+  
+      setAppointments(prevAppointments => [...prevAppointments, formattedAppointment]);
+      setNewAppointment({
+        patientId: patientId,
+        doctorId: null,
+        appointmentDateTime: '',
+        status: 'SCHEDULED'
+      });
+  
+      alert('Appointment created successfully!');
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      alert(`Failed to create appointment: ${error.message}`);
+    }
+  };
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/doctor/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch doctors');
+        }
+  
+        const doctorsData = await response.json();
+        
+        const formattedDoctors = doctorsData.map(doctor => ({
+          id: doctor.id,
+          name: doctor.passwordHash,
+          firstName: doctor.passwordHash,
+          lastName: doctor.lastName,
+          specialization: doctor.specialization,
+          availability: doctor.availability
+        }));
+  
+        setDoctors(formattedDoctors);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        alert(`Failed to load doctors: ${error.message}`);
+      }
+    };
+  
+    fetchDoctors();
+  }, []);
 
   const handleProfileClick = () => {
     setTabContent('profile');
@@ -220,7 +426,8 @@ const PatientDashboard = ({ onLogout }) => {
       <div className="appointments-list">
         {appointments.map(app => (
           <div className="appointment-item" key={app.id}>
-            <div>{app.doctor}</div>
+            <div className="doctor-name">{app.doctor}</div>
+            <div className="appointment-status"> {app.status}</div>
             <div className="date-time">{app.date} {app.time}</div>
             <div className="appointment-actions">
               <button onClick={() => handleEditAppointment(app.id)}>Edit</button>
@@ -230,16 +437,41 @@ const PatientDashboard = ({ onLogout }) => {
         ))}
       </div>
       <div className="create-appointment">
-        <button 
-          onClick={() => {
-            setIsCreatingAppointment(true);
-            alert("Opening appointment request form...");
-            setTimeout(() => setIsCreatingAppointment(false), 2000);
-          }}
-          disabled={isCreatingAppointment}
-        >
-          {isCreatingAppointment ? "Processing..." : "Create New Appointment Request"}
-        </button>
+        <form onSubmit={handleCreateAppointment}>
+          <div>
+            <label htmlFor="doctorSelect">Select Doctor:</label>
+            <select
+              id="doctorSelect"
+              value={newAppointment.doctorId || ''}
+              onChange={(e) => setNewAppointment({
+                ...newAppointment, 
+                doctorId: parseInt(e.target.value)
+              })}
+              required
+            >
+              <option value="">Select a Doctor</option>
+              {doctors.map(doctor => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.firstName} {doctor.lastName} - {doctor.specialization} ({doctor.availability})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="appointmentDateTime">Appointment Date and Time:</label>
+            <input
+              type="datetime-local"
+              id="appointmentDateTime"
+              value={newAppointment.appointmentDateTime}
+              onChange={(e) => setNewAppointment({
+                ...newAppointment, 
+                appointmentDateTime: e.target.value
+              })}
+              required
+            />
+          </div>
+          <button type="submit">Create Appointment</button>
+        </form>
       </div>
     </div>
   );
@@ -325,14 +557,14 @@ const PatientDashboard = ({ onLogout }) => {
             key={doctor.id}
             onClick={() => setActiveDoctor(doctor.id)}
           >
-            {doctor.name}
+            {doctor.firstName} {doctor.lastName}
           </div>
         ))}
       </div>
       <div className="chat-area">
         {activeDoctor && (
           <div className="message-bar">
-            <span className="doctor-name">{doctors.find(d => d.id === activeDoctor)?.name}</span>
+            <span className="doctor-name">{doctors.find(d => d.id === activeDoctor)?.firstName}</span>
             <button className="call-button" onClick={handleCall} disabled={!activeDoctor}>
               <Phone size={16} /> Call
             </button>

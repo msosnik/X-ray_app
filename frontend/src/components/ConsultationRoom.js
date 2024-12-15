@@ -29,8 +29,8 @@ function ConsultationRoom() {
     const initializeClients = async () => {
       try {
         setLoadingState('Checking credentials');
-        const username = localStorage.getItem('username');
-        const userTypeFromStorage = localStorage.getItem('userType');
+        const username = localStorage.getItem('userEmail').split('@')[0];
+        const userTypeFromStorage = localStorage.getItem('userRole');
         
         console.log('Username from localStorage:', username);
         console.log('UserType from localStorage:', userTypeFromStorage);

@@ -31,25 +31,18 @@ const PatientDashboard = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [doctors, setDoctors] = useState([]);
-  const patientId = 1;
+  const storedUserData = JSON.parse(localStorage.getItem('userInfo'));
+  const [patientId, setPatientId] = useState(storedUserData?.id || null);
+  const [userData, setUserData] = useState({
+    firstName: storedUserData?.firstName || 'User',
+    lastName: storedUserData?.lastName || '',
+    email: storedUserData?.email || '',
+  });
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
   const USER_ID = 'patient_john_doe';
   const USER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicGF0aWVudF9qb2huX2RvZSJ9.placeholder_patient_token';
   const CONSULTATION_ROOM_ID = 'consultation_room';
-
-  const userData = {
-    firstName: "John",
-    lastName: "Doe",
-  };
-
-  // const doctors = [
-  //   { id: 1, name: "Dr. Jane Smith" },
-  //   { id: 2, name: "Dr. Michael Johnson" },
-  //   { id: 3, name: "Dr. Emily Brown" },
-  //   { id: 4, name: "Dr. David Lee" },
-  //   { id: 5, name: "Dr. Sarah Wilson" }
-  // ];
 
   const [newAppointment, setNewAppointment] = useState({
     patientId: patientId,
@@ -154,7 +147,9 @@ const PatientDashboard = ({ onLogout }) => {
   };
   
   useEffect(() => {
-    fetchAppointments();
+    if (patientId) {
+      fetchAppointments();
+    }
   }, [patientId]);
 
   const handleEditAppointment = (id) => {
@@ -187,11 +182,30 @@ const PatientDashboard = ({ onLogout }) => {
     e.preventDefault();
   
     try {
+      if (!newAppointment.doctorId || !newAppointment.appointmentDateTime) {
+        alert('Please select a doctor and appointment time');
+        return;
+      }
+
+      const selectedDoctor = doctors.find(d => d.id === newAppointment.doctorId);
+
+      const appointmentDateTimeLocal = new Date(newAppointment.appointmentDateTime);
+
+      const appointmentDateTimeUTC = new Date(
+        appointmentDateTimeLocal.getTime() - appointmentDateTimeLocal.getTimezoneOffset() * 60000
+      );
+
       const appointmentData = {
-        ...newAppointment,
+        id: 0,
+        patientId: patientId,
+        doctorId: newAppointment.doctorId,
+        appointmentDateTime: appointmentDateTimeUTC.toISOString(),
+        status: "SCHEDULED",
         createdAt: new Date().toISOString().split('T')[0],
         updatedAt: new Date().toISOString().split('T')[0]
       };
+
+      console.log('Appointment Creation Payload:', JSON.stringify(appointmentData, null, 2));
   
       const response = await fetch('http://localhost:8080/appointment', {
         method: 'POST',
@@ -202,25 +216,32 @@ const PatientDashboard = ({ onLogout }) => {
       });
   
       if (!response.ok) {
-        throw new Error('Failed to create appointment');
+        const errorText = await response.text();
+        console.error('Error Response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
   
       const createdAppointment = await response.json();
   
+      const appointmentDateLocal = new Date(createdAppointment.appointmentDateTime);
+      const formattedDate = appointmentDateLocal.toISOString().split('T')[0];
+      const formattedTime = appointmentDateLocal.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+  
       const formattedAppointment = {
         id: createdAppointment.id,
-        doctor: `Dr. ${doctors.find(d => d.id === newAppointment.doctorId)?.passwordHash || 'Unknown'}`,
+        doctor: selectedDoctor 
+          ? `Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName}` 
+          : 'Unknown Doctor',
         status: createdAppointment.status || 'SCHEDULED',
-        date: new Date(createdAppointment.appointmentDateTime).toISOString().split('T')[0],
-        time: new Date(createdAppointment.appointmentDateTime).toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        }),
+        date: formattedDate,
+        time: formattedTime,
         originalData: createdAppointment
       };
   
-      setAppointments([...appointments, formattedAppointment]);
+      setAppointments(prevAppointments => [...prevAppointments, formattedAppointment]);
       setNewAppointment({
         patientId: patientId,
         doctorId: null,
@@ -252,8 +273,10 @@ const PatientDashboard = ({ onLogout }) => {
         const doctorsData = await response.json();
         
         const formattedDoctors = doctorsData.map(doctor => ({
-          id: doctor.medicalLicenceId,
-          name: `Dr. ${doctor.passwordHash} ${doctor.lastName}`,
+          id: doctor.id,
+          name: doctor.passwordHash,
+          firstName: doctor.passwordHash,
+          lastName: doctor.lastName,
           specialization: doctor.specialization,
           availability: doctor.availability
         }));
@@ -413,19 +436,7 @@ const PatientDashboard = ({ onLogout }) => {
           </div>
         ))}
       </div>
-      {/* <div className="create-appointment">
-        <button 
-          onClick={() => {
-            setIsCreatingAppointment(true);
-            alert("Opening appointment request form...");
-            setTimeout(() => setIsCreatingAppointment(false), 2000);
-          }}
-          disabled={isCreatingAppointment}
-        >
-          {isCreatingAppointment ? "Processing..." : "Create New Appointment Request"}
-        </button>
-      </div> */}
-      <div className="create-appointment-form">
+      <div className="create-appointment">
         <h3>Create New Appointment</h3>
         <form onSubmit={handleCreateAppointment}>
           <div>

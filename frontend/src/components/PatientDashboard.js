@@ -30,6 +30,7 @@ const PatientDashboard = ({ onLogout }) => {
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [doctors, setDoctors] = useState([]);
   const patientId = 1;
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
@@ -42,13 +43,20 @@ const PatientDashboard = ({ onLogout }) => {
     lastName: "Doe",
   };
 
-  const doctors = [
-    { id: 1, name: "Dr. Jane Smith" },
-    { id: 2, name: "Dr. Michael Johnson" },
-    { id: 3, name: "Dr. Emily Brown" },
-    { id: 4, name: "Dr. David Lee" },
-    { id: 5, name: "Dr. Sarah Wilson" }
-  ];
+  // const doctors = [
+  //   { id: 1, name: "Dr. Jane Smith" },
+  //   { id: 2, name: "Dr. Michael Johnson" },
+  //   { id: 3, name: "Dr. Emily Brown" },
+  //   { id: 4, name: "Dr. David Lee" },
+  //   { id: 5, name: "Dr. Sarah Wilson" }
+  // ];
+
+  const [newAppointment, setNewAppointment] = useState({
+    patientId: patientId,
+    doctorId: null,
+    appointmentDateTime: '',
+    status: 'SCHEDULED'
+  });
 
   const chatMessages = {
     1: [
@@ -174,6 +182,91 @@ const PatientDashboard = ({ onLogout }) => {
       alert(`Failed to delete appointment: ${error.message}`);
     }
   };
+
+  const handleCreateAppointment = async (e) => {
+    e.preventDefault();
+  
+    try {
+      const appointmentData = {
+        ...newAppointment,
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0]
+      };
+  
+      const response = await fetch('http://localhost:8080/appointment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData)
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to create appointment');
+      }
+  
+      const createdAppointment = await response.json();
+  
+      const formattedAppointment = {
+        id: createdAppointment.id,
+        doctor: `Dr. ${doctors.find(d => d.id === newAppointment.doctorId)?.passwordHash || 'Unknown'}`,
+        status: createdAppointment.status || 'SCHEDULED',
+        date: new Date(createdAppointment.appointmentDateTime).toISOString().split('T')[0],
+        time: new Date(createdAppointment.appointmentDateTime).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }),
+        originalData: createdAppointment
+      };
+  
+      setAppointments([...appointments, formattedAppointment]);
+      setNewAppointment({
+        patientId: patientId,
+        doctorId: null,
+        appointmentDateTime: '',
+        status: 'SCHEDULED'
+      });
+  
+      alert('Appointment created successfully!');
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      alert(`Failed to create appointment: ${error.message}`);
+    }
+  };
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/doctor/', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch doctors');
+        }
+  
+        const doctorsData = await response.json();
+        
+        const formattedDoctors = doctorsData.map(doctor => ({
+          id: doctor.medicalLicenceId,
+          name: `Dr. ${doctor.passwordHash} ${doctor.lastName}`,
+          specialization: doctor.specialization,
+          availability: doctor.availability
+        }));
+  
+        setDoctors(formattedDoctors);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        alert(`Failed to load doctors: ${error.message}`);
+      }
+    };
+  
+    fetchDoctors();
+  }, []);
 
   const handleProfileClick = () => {
     setTabContent('profile');
@@ -320,7 +413,7 @@ const PatientDashboard = ({ onLogout }) => {
           </div>
         ))}
       </div>
-      <div className="create-appointment">
+      {/* <div className="create-appointment">
         <button 
           onClick={() => {
             setIsCreatingAppointment(true);
@@ -331,6 +424,44 @@ const PatientDashboard = ({ onLogout }) => {
         >
           {isCreatingAppointment ? "Processing..." : "Create New Appointment Request"}
         </button>
+      </div> */}
+      <div className="create-appointment-form">
+        <h3>Create New Appointment</h3>
+        <form onSubmit={handleCreateAppointment}>
+          <div>
+            <label htmlFor="doctorSelect">Select Doctor:</label>
+            <select
+              id="doctorSelect"
+              value={newAppointment.doctorId || ''}
+              onChange={(e) => setNewAppointment({
+                ...newAppointment, 
+                doctorId: parseInt(e.target.value)
+              })}
+              required
+            >
+              <option value="">Select a Doctor</option>
+              {doctors.map(doctor => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.name} - {doctor.specialization} ({doctor.availability})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="appointmentDateTime">Appointment Date and Time:</label>
+            <input
+              type="datetime-local"
+              id="appointmentDateTime"
+              value={newAppointment.appointmentDateTime}
+              onChange={(e) => setNewAppointment({
+                ...newAppointment, 
+                appointmentDateTime: e.target.value
+              })}
+              required
+            />
+          </div>
+          <button type="submit">Create Appointment</button>
+        </form>
       </div>
     </div>
   );

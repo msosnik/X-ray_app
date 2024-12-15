@@ -557,14 +557,14 @@ const PatientDashboard = ({ onLogout }) => {
             key={doctor.id}
             onClick={() => setActiveDoctor(doctor.id)}
           >
-            {doctor.name}
+            {doctor.firstName} {doctor.lastName}
           </div>
         ))}
       </div>
       <div className="chat-area">
         {activeDoctor && (
           <div className="message-bar">
-            <span className="doctor-name">{doctors.find(d => d.id === activeDoctor)?.name}</span>
+            <span className="doctor-name">{doctors.find(d => d.id === activeDoctor)?.firstName}</span>
             <button className="call-button" onClick={handleCall} disabled={!activeDoctor}>
               <Phone size={16} /> Call
             </button>

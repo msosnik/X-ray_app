@@ -262,6 +262,7 @@ button:disabled {
     padding: 10px 20px;
     border-radius: 20px;
     font-size: 1.2vw;
+    margin-top: 25px;
 }
 
 .create-appointment button:hover {

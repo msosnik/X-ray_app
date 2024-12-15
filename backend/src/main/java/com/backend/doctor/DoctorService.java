@@ -39,6 +39,7 @@ public class DoctorService {
                 .map(Appointment::getId)
                 .collect(Collectors.toList());
         return new DoctorDTO(
+                doctor.getId(),
                 doctor.getEmail(),
                 doctor.getFirstName(),
                 doctor.getPasswordHash(),

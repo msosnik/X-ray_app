@@ -29,7 +29,7 @@ public class ChatService {
         List<Integer> messageIds = chat.getMessages().stream()
                 .map(Message::getId)
                 .collect(Collectors.toList());
-        return new ChatDTO(participantIds, messageIds);
+        return new ChatDTO(id, participantIds, messageIds);
     }
 
     public ChatDTO createChat(List<Integer> participantIds) {
@@ -41,7 +41,7 @@ public class ChatService {
         List<Integer> messageIds = savedChat.getMessages().stream()
                 .map(Message::getId)
                 .collect(Collectors.toList());
-        return new ChatDTO(participantIds, messageIds);
+        return new ChatDTO(savedChat.getId(), participantIds, messageIds);
     }
 }
 

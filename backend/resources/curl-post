@@ -3,4 +3,4 @@ curl -X POST "http://localhost:8080/api/xray-images/full" \
 -F "data={\"patientId\":1,\"bodyPart\":\"Hand\",\"uploadDate\":\"2023-10-01\",\"imagePath\":\"wololo\"};type=application/json" \
 -F "file=@.../Xray_app/backend/resources/3.jpeg"
 
-curl -X POST "http://localhost:8080/api/xray-images/2/upload" -H "Content-Type: multipart/form-data" -F "file=@.../Xray_app/backend/resources/3.jpeg"
+curl -X POST "http://localhost:8080/xray-images/2/upload" -H "Content-Type: multipart/form-data" -F "file=@.../Xray_app/backend/resources/3.jpeg"

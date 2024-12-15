@@ -1,6 +1,7 @@
 package com.backend.chat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,12 +14,12 @@ public class ChatController {
     private ChatService chatService;
 
     @GetMapping("/{id}")
-    public ChatDTO getChat(@PathVariable Integer id) {
-        return chatService.getChatById(id);
+    public ResponseEntity<ChatDTO> getChat(@PathVariable Integer id) {
+        return ResponseEntity.ok(chatService.getChatById(id));
     }
 
     @PostMapping("/")
-    public ChatDTO createChat(@RequestBody List<Integer> participantIds) {
-        return chatService.createChat(participantIds);
+    public ResponseEntity<ChatDTO> createChat(@RequestBody List<Integer> participantIds) {
+        return ResponseEntity.ok(chatService.createChat(participantIds));
     }
 }

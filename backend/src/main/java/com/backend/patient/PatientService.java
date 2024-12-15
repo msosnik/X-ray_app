@@ -46,6 +46,7 @@ public class PatientService {
                 .map(Appointment::getId)
                 .collect(Collectors.toList());
         return new PatientDTO(
+                patient.getId(),
                 patient.getEmail(),
                 patient.getPasswordHash(),
                 patient.getFirstName(),

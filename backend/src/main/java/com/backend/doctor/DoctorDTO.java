@@ -10,6 +10,8 @@ import java.util.List;
 @Data
 public class DoctorDTO {
 
+    private int id;
+
     private String email;
 
     private String passwordHash;

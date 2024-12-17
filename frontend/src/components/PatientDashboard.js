@@ -33,6 +33,7 @@ const PatientDashboard = ({ onLogout }) => {
   const [doctors, setDoctors] = useState([]);
   const storedUserData = JSON.parse(localStorage.getItem('userInfo'));
   const [patientId, setPatientId] = useState(storedUserData?.id || null);
+  const [report, setReport] = useState(null);
   const [userData, setUserData] = useState({
     firstName: storedUserData?.firstName || 'User',
     lastName: storedUserData?.lastName || '',
@@ -305,118 +306,249 @@ const PatientDashboard = ({ onLogout }) => {
   };
 
   const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-
-    const currentDate = new Date().toISOString().split('T')[0];
-
-    const imageMetadata = {
-        patientId: 1,
-        bodyPart: selectedBodyPart,
-        uploadDate: currentDate,
-        imagePath: "wololo",
-    };
-
-    if (file && file.type.startsWith("image/")) {
-        try {
-            console.log("Uploading full image:", {
-                metadata: imageMetadata,
-                fileName: file.name,
-                fileType: file.type,
-                fileSize: file.size,
-            });
-
-            const formData = new FormData();
-            formData.append(
-                "data",
-                new Blob([JSON.stringify(imageMetadata)], { type: "application/json" })
-            );
-            formData.append("file", file);
-
-            const uploadResponse = await fetch("http://localhost:8080/xray-images/full", {
-                method: "POST",
-                body: formData,
-            });
-
-            console.log("Response details:", {
-                status: uploadResponse.status,
-                statusText: uploadResponse.statusText,
-                headers: Object.fromEntries(uploadResponse.headers),
-            });
-
-            if (!uploadResponse.ok) {
-                throw new Error(`Upload failed: ${uploadResponse.status}`);
-            }
-
-            const uploadResponseData = await uploadResponse.json();
-            console.log("Uploaded full X-ray image response:", uploadResponseData);
-
-            const imageId = 1;
-
-            const analysisResponse = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
-
-            if (!analysisResponse.ok) {
-              throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
-            }
-
-            const analysisData = await analysisResponse.json();
-
-            const imageUrl = URL.createObjectURL(file);
-            setUploadedImage(imageUrl);
-
-            setProcessedImage(analysisData);
-
-            alert("Full image upload successful!");
-        } catch (error) {
-            console.error("Full upload error details:", {
-                message: error.message,
-                name: error.name,
-                stack: error.stack,
-            });
-            setProcessedImage(`Analysis failed: ${error.message}`);
-            alert(`Full upload failed: ${error.message}`);
+    const xrayFile = event.target.files[0];
+  
+    if (!xrayFile) {
+      alert('Please select an X-ray image to upload');
+      return;
+    }
+  
+    if (!xrayFile.type.startsWith('image/')) {
+      alert('Please upload a valid image file');
+      return;
+    }
+  
+    try {
+      const formData = new FormData();
+      formData.append('file', xrayFile);
+  
+      const response = await fetch('http://localhost:8000/predict', {
+        method: 'POST',
+        body: formData
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        const imageUrl = URL.createObjectURL(xrayFile);
+        setUploadedImage(imageUrl);
+  
+        setProcessedImage(data);
+  
+        if (data.report) {
+          setReport(data.report[0]);
         }
-    } else {
-        alert("Please upload a valid image file");
+  
+        alert('X-ray image uploaded and processed successfully!');
+      } else {
+        alert(data.error || 'Failed to process the image');
+        setProcessedImage(null);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('An unexpected error occurred during upload');
     }
   };
 
-  const renderAnalysisResults = (analysisData) => {
-    const {
-      detectedAbnormalities,
-      analysisDate,
-      doctorReviewed,
-      doctorComments
-    } = analysisData;
+  // const handleImageUpload = async (event) => {
+  //   const file = event.target.files[0];
+
+  //   const currentDate = new Date().toISOString().split('T')[0];
+
+  //   const imageMetadata = {
+  //       patientId: 1,
+  //       bodyPart: selectedBodyPart,
+  //       uploadDate: currentDate,
+  //       imagePath: "wololo",
+  //   };
+
+  //   if (file && file.type.startsWith("image/")) {
+  //       try {
+  //           console.log("Uploading full image:", {
+  //               metadata: imageMetadata,
+  //               fileName: file.name,
+  //               fileType: file.type,
+  //               fileSize: file.size,
+  //           });
+
+  //           const formData = new FormData();
+  //           formData.append(
+  //               "data",
+  //               new Blob([JSON.stringify(imageMetadata)], { type: "application/json" })
+  //           );
+  //           formData.append("file", file);
+
+  //           const uploadResponse = await fetch("http://localhost:8080/xray-images/full", {
+  //               method: "POST",
+  //               body: formData,
+  //           });
+
+  //           console.log("Response details:", {
+  //               status: uploadResponse.status,
+  //               statusText: uploadResponse.statusText,
+  //               headers: Object.fromEntries(uploadResponse.headers),
+  //           });
+
+  //           if (!uploadResponse.ok) {
+  //               throw new Error(`Upload failed: ${uploadResponse.status}`);
+  //           }
+
+  //           const uploadResponseData = await uploadResponse.json();
+  //           console.log("Uploaded full X-ray image response:", uploadResponseData);
+
+  //           const imageId = 1;
+
+  //           const analysisResponse = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
+
+  //           if (!analysisResponse.ok) {
+  //             throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
+  //           }
+
+  //           const analysisData = await analysisResponse.json();
+
+  //           const imageUrl = URL.createObjectURL(file);
+  //           setUploadedImage(imageUrl);
+
+  //           setProcessedImage(analysisData);
+
+  //           alert("Full image upload successful!");
+  //       } catch (error) {
+  //           console.error("Full upload error details:", {
+  //               message: error.message,
+  //               name: error.name,
+  //               stack: error.stack,
+  //           });
+  //           setProcessedImage(`Analysis failed: ${error.message}`);
+  //           alert(`Full upload failed: ${error.message}`);
+  //       }
+  //   } else {
+  //       alert("Please upload a valid image file");
+  //   }
+  // };
+
+  // const renderAnalysisResults = (analysisData) => {
+  //   const {
+  //     detectedAbnormalities,
+  //     analysisDate,
+  //     doctorReviewed,
+  //     doctorComments
+  //   } = analysisData;
   
-    return (
-      <div className="analysis-details">
-        <h4>X-Ray Analysis</h4>
-        <p><strong>Date:</strong> {analysisDate}</p>
+  //   return (
+  //     <div className="analysis-details">
+  //       <h4>X-Ray Analysis</h4>
+  //       <p><strong>Date:</strong> {analysisDate}</p>
         
-        <div className="abnormalities-section">
-          <strong>Detected Abnormalities:</strong>
-          {detectedAbnormalities && detectedAbnormalities.length > 0 ? (
-            <ul className="abnormalities-list">
-              {detectedAbnormalities.map((abnormality, index) => (
-                <li key={index}>{abnormality.replace(/^\s+/, '')}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>No abnormalities detected</p>
-          )}
-        </div>
+  //       <div className="abnormalities-section">
+  //         <strong>Detected Abnormalities:</strong>
+  //         {detectedAbnormalities && detectedAbnormalities.length > 0 ? (
+  //           <ul className="abnormalities-list">
+  //             {detectedAbnormalities.map((abnormality, index) => (
+  //               <li key={index}>{abnormality.replace(/^\s+/, '')}</li>
+  //             ))}
+  //           </ul>
+  //         ) : (
+  //           <p>No abnormalities detected</p>
+  //         )}
+  //       </div>
   
-        <div className="doctor-review-section">
-          <strong>Doctor Review Status:</strong>
-          <p>{doctorReviewed ? 'Reviewed' : 'Pending Review'}</p>
+  //       <div className="doctor-review-section">
+  //         <strong>Doctor Review Status:</strong>
+  //         <p>{doctorReviewed ? 'Reviewed' : 'Pending Review'}</p>
           
-          {doctorComments && (
-            <div className="doctor-comments">
-              <strong>Doctor Comments:</strong>
-              <p>{doctorComments}</p>
-            </div>
-          )}
+  //         {doctorComments && (
+  //           <div className="doctor-comments">
+  //             <strong>Doctor Comments:</strong>
+  //             <p>{doctorComments}</p>
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // };
+
+  const AnalysisResultsRenderer = ({ uploadedImage, processedImage }) => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+      if (!uploadedImage || !processedImage || !processedImage.boxes) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const image = new Image();
+      
+      image.onload = () => {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        
+        ctx.drawImage(image, 0, 0, image.width, image.height);
+        
+        processedImage.boxes.forEach((box, index) => {
+          const [x1, y1, x2, y2] = box;
+          const width = x2 - x1;
+          const height = y2 - y1;
+          
+          ctx.beginPath();
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'red';
+          ctx.rect(x1, y1, width, height);
+          ctx.stroke();
+          
+          if (processedImage.scores && processedImage.scores[index]) {
+            const confidence = (processedImage.scores[index] * 100).toFixed(2);
+            ctx.fillStyle = 'red';
+            ctx.font = '14px Arial';
+            ctx.fillText(`${confidence}%`, x1, y1 - 5);
+          }
+        });
+      };
+      
+      image.src = uploadedImage;
+    }, [uploadedImage, processedImage]);
+
+    return (
+      <div className="analysis-results">
+        <div className="image-with-boxes">
+          <canvas 
+            ref={canvasRef} 
+            style={{ 
+              maxWidth: '100%', 
+              maxHeight: '400px', 
+              objectFit: 'contain' 
+            }} 
+          />
         </div>
+        {processedImage.report && (
+          <div className="analysis-report">
+            <h4>Analysis Report</h4>
+            {processedImage.report.map((reportItem, index) => (
+              <p key={index}>{reportItem}</p>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAnalysisResults = (processedImage) => {
+    if (!processedImage) {
+      return (
+        <div className="placeholder-message">
+          Upload an image to see results
+        </div>
+      );
+    }
+
+    return (
+      <div id="processedImage" className="xray-image">
+        {uploadedImage && processedImage ? (
+          <AnalysisResultsRenderer 
+            uploadedImage={uploadedImage} 
+            processedImage={processedImage} 
+          />
+        ) : (
+          <div className="placeholder-message">Upload an image to see results</div>
+        )}
       </div>
     );
   };
@@ -534,9 +666,9 @@ const PatientDashboard = ({ onLogout }) => {
         <div className="xray-section">
           <h3>Results</h3>
           <div id="processedImage" className="xray-image">
-            {processedImage ? (
+            {processedImage && uploadedImage ? (
               <div className="analysis-results">
-                {renderAnalysisResults(processedImage)}
+                {renderAnalysisResults(processedImage, processedImage)}
               </div>
             ) : (
               <div className="placeholder-message">Upload an image to see results</div>

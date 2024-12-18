@@ -611,16 +611,6 @@ const PatientDashboard = ({ onLogout }) => {
 
   const showUploadXRayTab = () => (
     <div className="upload-xray">
-      <div className="body-part-selection">
-        <label htmlFor="bodyPart">Body part:</label>
-        <select id="bodyPart" value={selectedBodyPart} onChange={(e) => setSelectedBodyPart(e.target.value)}>
-          <option value="Chest">Chest</option>
-          <option value="Hand">Hand</option>
-          <option value="Foot">Foot</option>
-          <option value="Skull">Skull</option>
-          <option value="Spine">Spine</option>
-        </select>
-      </div>
       <div className="xray-content">
         <div className="xray-section">
           <h3>Original</h3>
@@ -632,16 +622,28 @@ const PatientDashboard = ({ onLogout }) => {
                 style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
               />
             ) : (
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={(e) => {
-                  handleImageUpload(e);
-                  handleImageUploadDatabase(e);
-                }}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
+              <>
+                <div className="body-part-selection">
+                  <label htmlFor="bodyPart">Body part:</label>
+                  <select id="bodyPart" value={selectedBodyPart} onChange={(e) => setSelectedBodyPart(e.target.value)}>
+                    <option value="Chest">Chest</option>
+                    <option value="Hand">Hand</option>
+                    <option value="Foot">Foot</option>
+                    <option value="Skull">Skull</option>
+                    <option value="Spine">Spine</option>
+                  </select>
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    handleImageUpload(e);
+                    handleImageUploadDatabase(e);
+                  }}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                />
+              </>
             )}
             <button 
               id="uploadBtn" 

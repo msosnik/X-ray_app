@@ -21,6 +21,7 @@ const PatientDashboard = ({ onLogout }) => {
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
+  const [analysisData, setAnalysisData] = useState(null);
   const [upcomingConsultations, setUpcomingConsultations] = useState([]);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -350,124 +351,123 @@ const PatientDashboard = ({ onLogout }) => {
     }
   };
 
-  // const handleImageUpload = async (event) => {
-  //   const file = event.target.files[0];
+  const handleImageUploadDatabase = async (event) => {
+    const file = event.target.files[0];
 
-  //   const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = new Date().toISOString().split('T')[0];
 
-  //   const imageMetadata = {
-  //       patientId: 1,
-  //       bodyPart: selectedBodyPart,
-  //       uploadDate: currentDate,
-  //       imagePath: "wololo",
-  //   };
+    const imageMetadata = {
+        patientId: 1,
+        bodyPart: selectedBodyPart,
+        uploadDate: currentDate,
+        imagePath: "wololo",
+    };
 
-  //   if (file && file.type.startsWith("image/")) {
-  //       try {
-  //           console.log("Uploading full image:", {
-  //               metadata: imageMetadata,
-  //               fileName: file.name,
-  //               fileType: file.type,
-  //               fileSize: file.size,
-  //           });
+    if (file && file.type.startsWith("image/")) {
+        try {
+            console.log("Uploading full image:", {
+                metadata: imageMetadata,
+                fileName: file.name,
+                fileType: file.type,
+                fileSize: file.size,
+            });
 
-  //           const formData = new FormData();
-  //           formData.append(
-  //               "data",
-  //               new Blob([JSON.stringify(imageMetadata)], { type: "application/json" })
-  //           );
-  //           formData.append("file", file);
+            const formData = new FormData();
+            formData.append(
+                "data",
+                new Blob([JSON.stringify(imageMetadata)], { type: "application/json" })
+            );
+            formData.append("file", file);
 
-  //           const uploadResponse = await fetch("http://localhost:8080/xray-images/full", {
-  //               method: "POST",
-  //               body: formData,
-  //           });
+            const uploadResponse = await fetch("http://localhost:8080/xray-images/full", {
+                method: "POST",
+                body: formData,
+            });
 
-  //           console.log("Response details:", {
-  //               status: uploadResponse.status,
-  //               statusText: uploadResponse.statusText,
-  //               headers: Object.fromEntries(uploadResponse.headers),
-  //           });
+            console.log("Response details:", {
+                status: uploadResponse.status,
+                statusText: uploadResponse.statusText,
+                headers: Object.fromEntries(uploadResponse.headers),
+            });
 
-  //           if (!uploadResponse.ok) {
-  //               throw new Error(`Upload failed: ${uploadResponse.status}`);
-  //           }
+            if (!uploadResponse.ok) {
+                throw new Error(`Upload failed: ${uploadResponse.status}`);
+            }
 
-  //           const uploadResponseData = await uploadResponse.json();
-  //           console.log("Uploaded full X-ray image response:", uploadResponseData);
+            const uploadResponseData = await uploadResponse.json();
+            console.log("Uploaded full X-ray image response:", uploadResponseData);
 
-  //           const imageId = 1;
+            const imageId = 1;
 
-  //           const analysisResponse = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
+            const analysisResponse = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
 
-  //           if (!analysisResponse.ok) {
-  //             throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
-  //           }
+            if (!analysisResponse.ok) {
+              throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
+            }
 
-  //           const analysisData = await analysisResponse.json();
+            const analysisData = await analysisResponse.json();
 
-  //           const imageUrl = URL.createObjectURL(file);
-  //           setUploadedImage(imageUrl);
+            setAnalysisData(analysisData);
 
-  //           setProcessedImage(analysisData);
+            alert("Full image upload successful!");
+        } catch (error) {
+            console.error("Full upload error details:", {
+                message: error.message,
+                name: error.name,
+                stack: error.stack,
+            });
+            setAnalysisData(`Analysis failed: ${error.message}`);
+            alert(`Full upload failed: ${error.message}`);
+        }
+    } else {
+        alert("Please upload a valid image file");
+    }
+  };
 
-  //           alert("Full image upload successful!");
-  //       } catch (error) {
-  //           console.error("Full upload error details:", {
-  //               message: error.message,
-  //               name: error.name,
-  //               stack: error.stack,
-  //           });
-  //           setProcessedImage(`Analysis failed: ${error.message}`);
-  //           alert(`Full upload failed: ${error.message}`);
-  //       }
-  //   } else {
-  //       alert("Please upload a valid image file");
-  //   }
-  // };
-
-  // const renderAnalysisResults = (analysisData) => {
-  //   const {
-  //     detectedAbnormalities,
-  //     analysisDate,
-  //     doctorReviewed,
-  //     doctorComments
-  //   } = analysisData;
+  const renderAnalysisResults = (analysisData) => {
+    const {
+      detectedAbnormalities,
+      analysisDate,
+      doctorReviewed,
+      doctorComments
+    } = analysisData;
   
-  //   return (
-  //     <div className="analysis-details">
-  //       <h4>X-Ray Analysis</h4>
-  //       <p><strong>Date:</strong> {analysisDate}</p>
+    return (
+      <div className="analysis-details-horizontal">
+        <div>
+          <strong>Date:</strong>
+          <p>{analysisDate || new Date().toISOString().split('T')[0]}</p>
+        </div>
         
-  //       <div className="abnormalities-section">
-  //         <strong>Detected Abnormalities:</strong>
-  //         {detectedAbnormalities && detectedAbnormalities.length > 0 ? (
-  //           <ul className="abnormalities-list">
-  //             {detectedAbnormalities.map((abnormality, index) => (
-  //               <li key={index}>{abnormality.replace(/^\s+/, '')}</li>
-  //             ))}
-  //           </ul>
-  //         ) : (
-  //           <p>No abnormalities detected</p>
-  //         )}
-  //       </div>
-  
-  //       <div className="doctor-review-section">
-  //         <strong>Doctor Review Status:</strong>
-  //         <p>{doctorReviewed ? 'Reviewed' : 'Pending Review'}</p>
+        <div>
+          <strong>Detected Abnormalities:</strong>
+          {detectedAbnormalities && detectedAbnormalities.length > 0 ? (
+            <ul>
+              {detectedAbnormalities.map((abnormality, index) => (
+                <li key={index}>{abnormality.replace(/^\s+/, '')}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No abnormalities detected</p>
+          )}
+        </div>
+        
+        <div>
+          <strong>Doctor Review Status:</strong>
+          <p>{doctorReviewed ? 'Reviewed' : 'Pending Review'}</p>
           
-  //         {doctorComments && (
-  //           <div className="doctor-comments">
-  //             <strong>Doctor Comments:</strong>
-  //             <p>{doctorComments}</p>
-  //           </div>
-  //         )}
-  //       </div>
-  //     </div>
-  //   );
-  // };
+          {doctorComments && (
+            <div>
+              <strong>Doctor Comments:</strong>
+              <p>{doctorComments}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
-  const AnalysisResultsRenderer = ({ uploadedImage, processedImage }) => {
+  const ImageResultsRenderer = ({ uploadedImage, processedImage }) => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -530,7 +530,7 @@ const PatientDashboard = ({ onLogout }) => {
     );
   };
 
-  const renderAnalysisResults = (processedImage) => {
+  const renderImageResults = (processedImage) => {
     if (!processedImage) {
       return (
         <div className="placeholder-message">
@@ -542,7 +542,7 @@ const PatientDashboard = ({ onLogout }) => {
     return (
       <div id="processedImage" className="xray-image">
         {uploadedImage && processedImage ? (
-          <AnalysisResultsRenderer 
+          <ImageResultsRenderer 
             uploadedImage={uploadedImage} 
             processedImage={processedImage} 
           />
@@ -635,7 +635,10 @@ const PatientDashboard = ({ onLogout }) => {
               <input
                 type="file"
                 ref={fileInputRef}
-                onChange={handleImageUpload}
+                onChange={(e) => {
+                  handleImageUpload(e);
+                  handleImageUploadDatabase(e);
+                }}
                 accept="image/*"
                 style={{ display: 'none' }}
               />
@@ -668,7 +671,10 @@ const PatientDashboard = ({ onLogout }) => {
           <div id="processedImage" className="xray-image">
             {processedImage && uploadedImage ? (
               <div className="analysis-results">
-                {renderAnalysisResults(processedImage, processedImage)}
+                <ImageResultsRenderer 
+                  uploadedImage={uploadedImage} 
+                  processedImage={processedImage} 
+                />
               </div>
             ) : (
               <div className="placeholder-message">Upload an image to see results</div>
@@ -676,6 +682,11 @@ const PatientDashboard = ({ onLogout }) => {
           </div>
         </div>
       </div>
+      {processedImage && uploadedImage && (
+        <div className="analysis-results-container">
+          {renderAnalysisResults(analysisData)}
+        </div>
+      )}
     </div>
   );
   

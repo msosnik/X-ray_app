@@ -63,5 +63,25 @@ public class MessageService {
                 () -> new ResourceNotFoundException("Message not found with id: " + id));
         return convertToDTO(message);
     }
+
+    public List<MessageDTO> getAllMessages() {
+        return messageRepository.findAll().stream().map(this::convertToDTO).toList();
+    }
+
+    public MessageDTO updateMessage(Integer id, MessageDTO messageDTO) {
+        Message m = messageRepository.findById(id).orElseThrow( ()-> new ResourceNotFoundException("No message with id: "+id));
+        m.setAuthor(userRepository.findById( messageDTO.getAuthorId()).orElseThrow(() -> new ResourceNotFoundException("no user with id: "+messageDTO.getAuthorId())));
+        m.setChat(chatRepository.findById(messageDTO.getChatId()).orElseThrow(() -> new ResourceNotFoundException("no chat with id: "+messageDTO.getChatId())));
+        m.setText(messageDTO.getText());
+        m.setTimestamp(messageDTO.getTimestamp());
+        return convertToDTO(messageRepository.save(m));
+    }
+
+    public boolean deleteMessage(Integer id) {
+        boolean existed = messageRepository.findById(id).isPresent();
+        if (existed)
+            messageRepository.deleteById(id);
+        return existed;
+    }
 }
 

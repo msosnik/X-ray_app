@@ -70,4 +70,20 @@ public class XRayImageController {
         XRayImageDTO savedImage = xRayImageService.saveFullImage(xRayImageDTO, file);
         return ResponseEntity.ok(savedImage);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<XRayImageDTO> updateImage(
+            @PathVariable int id,
+            @RequestBody XRayImageDTO xRayImageDTO) {
+        XRayImageDTO updatedImage = xRayImageService.updateImage(id, xRayImageDTO);
+        return ResponseEntity.ok(updatedImage);
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteImage(@PathVariable int id) {
+        boolean isDeleted = xRayImageService.deleteImageData(id);
+        return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
 }

@@ -21,6 +21,7 @@ const PatientDashboard = ({ onLogout }) => {
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [processedImage, setProcessedImage] = useState(null);
+  const [analysisData, setAnalysisData] = useState(null);
   const [upcomingConsultations, setUpcomingConsultations] = useState([]);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -33,6 +34,7 @@ const PatientDashboard = ({ onLogout }) => {
   const [doctors, setDoctors] = useState([]);
   const storedUserData = JSON.parse(localStorage.getItem('userInfo'));
   const [patientId, setPatientId] = useState(storedUserData?.id || null);
+  const [report, setReport] = useState(null);
   const [userData, setUserData] = useState({
     firstName: storedUserData?.firstName || 'User',
     lastName: storedUserData?.lastName || '',
@@ -305,6 +307,51 @@ const PatientDashboard = ({ onLogout }) => {
   };
 
   const handleImageUpload = async (event) => {
+    const xrayFile = event.target.files[0];
+  
+    if (!xrayFile) {
+      alert('Please select an X-ray image to upload');
+      return;
+    }
+  
+    if (!xrayFile.type.startsWith('image/')) {
+      alert('Please upload a valid image file');
+      return;
+    }
+  
+    try {
+      const formData = new FormData();
+      formData.append('file', xrayFile);
+  
+      const response = await fetch('http://localhost:8000/predict', {
+        method: 'POST',
+        body: formData
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        const imageUrl = URL.createObjectURL(xrayFile);
+        setUploadedImage(imageUrl);
+  
+        setProcessedImage(data);
+  
+        if (data.report) {
+          setReport(data.report[0]);
+        }
+  
+        alert('X-ray image uploaded and processed successfully!');
+      } else {
+        alert(data.error || 'Failed to process the image');
+        setProcessedImage(null);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('An unexpected error occurred during upload');
+    }
+  };
+
+  const handleImageUploadDatabase = async (event) => {
     const file = event.target.files[0];
 
     const currentDate = new Date().toISOString().split('T')[0];
@@ -360,10 +407,7 @@ const PatientDashboard = ({ onLogout }) => {
 
             const analysisData = await analysisResponse.json();
 
-            const imageUrl = URL.createObjectURL(file);
-            setUploadedImage(imageUrl);
-
-            setProcessedImage(analysisData);
+            setAnalysisData(analysisData);
 
             alert("Full image upload successful!");
         } catch (error) {
@@ -372,7 +416,7 @@ const PatientDashboard = ({ onLogout }) => {
                 name: error.name,
                 stack: error.stack,
             });
-            setProcessedImage(`Analysis failed: ${error.message}`);
+            setAnalysisData(`Analysis failed: ${error.message}`);
             alert(`Full upload failed: ${error.message}`);
         }
     } else {
@@ -389,14 +433,16 @@ const PatientDashboard = ({ onLogout }) => {
     } = analysisData;
   
     return (
-      <div className="analysis-details">
-        <h4>X-Ray Analysis</h4>
-        <p><strong>Date:</strong> {analysisDate}</p>
+      <div className="analysis-details-horizontal">
+        <div>
+          <strong>Date:</strong>
+          <p>{analysisDate || new Date().toISOString().split('T')[0]}</p>
+        </div>
         
-        <div className="abnormalities-section">
+        <div>
           <strong>Detected Abnormalities:</strong>
           {detectedAbnormalities && detectedAbnormalities.length > 0 ? (
-            <ul className="abnormalities-list">
+            <ul>
               {detectedAbnormalities.map((abnormality, index) => (
                 <li key={index}>{abnormality.replace(/^\s+/, '')}</li>
               ))}
@@ -405,18 +451,104 @@ const PatientDashboard = ({ onLogout }) => {
             <p>No abnormalities detected</p>
           )}
         </div>
-  
-        <div className="doctor-review-section">
+        
+        <div>
           <strong>Doctor Review Status:</strong>
           <p>{doctorReviewed ? 'Reviewed' : 'Pending Review'}</p>
           
           {doctorComments && (
-            <div className="doctor-comments">
+            <div>
               <strong>Doctor Comments:</strong>
               <p>{doctorComments}</p>
             </div>
           )}
         </div>
+      </div>
+    );
+  };
+
+  const ImageResultsRenderer = ({ uploadedImage, processedImage }) => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+      if (!uploadedImage || !processedImage || !processedImage.boxes) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const image = new Image();
+      
+      image.onload = () => {
+        canvas.width = image.width;
+        canvas.height = image.height;
+        
+        ctx.drawImage(image, 0, 0, image.width, image.height);
+        
+        processedImage.boxes.forEach((box, index) => {
+          const [x1, y1, x2, y2] = box;
+          const width = x2 - x1;
+          const height = y2 - y1;
+          
+          ctx.beginPath();
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'red';
+          ctx.rect(x1, y1, width, height);
+          ctx.stroke();
+          
+          if (processedImage.scores && processedImage.scores[index]) {
+            const confidence = (processedImage.scores[index] * 100).toFixed(2);
+            ctx.fillStyle = 'red';
+            ctx.font = '14px Arial';
+            ctx.fillText(`${confidence}%`, x1, y1 - 5);
+          }
+        });
+      };
+      
+      image.src = uploadedImage;
+    }, [uploadedImage, processedImage]);
+
+    return (
+      <div className="analysis-results">
+        <div className="image-with-boxes">
+          <canvas 
+            ref={canvasRef} 
+            style={{ 
+              maxWidth: '100%', 
+              maxHeight: '400px', 
+              objectFit: 'contain' 
+            }} 
+          />
+        </div>
+        {processedImage.report && (
+          <div className="analysis-report">
+            <h4>Analysis Report</h4>
+            {processedImage.report.map((reportItem, index) => (
+              <p key={index}>{reportItem}</p>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderImageResults = (processedImage) => {
+    if (!processedImage) {
+      return (
+        <div className="placeholder-message">
+          Upload an image to see results
+        </div>
+      );
+    }
+
+    return (
+      <div id="processedImage" className="xray-image">
+        {uploadedImage && processedImage ? (
+          <ImageResultsRenderer 
+            uploadedImage={uploadedImage} 
+            processedImage={processedImage} 
+          />
+        ) : (
+          <div className="placeholder-message">Upload an image to see results</div>
+        )}
       </div>
     );
   };
@@ -479,16 +611,6 @@ const PatientDashboard = ({ onLogout }) => {
 
   const showUploadXRayTab = () => (
     <div className="upload-xray">
-      <div className="body-part-selection">
-        <label htmlFor="bodyPart">Body part:</label>
-        <select id="bodyPart" value={selectedBodyPart} onChange={(e) => setSelectedBodyPart(e.target.value)}>
-          <option value="Chest">Chest</option>
-          <option value="Hand">Hand</option>
-          <option value="Foot">Foot</option>
-          <option value="Skull">Skull</option>
-          <option value="Spine">Spine</option>
-        </select>
-      </div>
       <div className="xray-content">
         <div className="xray-section">
           <h3>Original</h3>
@@ -500,13 +622,28 @@ const PatientDashboard = ({ onLogout }) => {
                 style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
               />
             ) : (
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
+              <>
+                <div className="body-part-selection">
+                  <label htmlFor="bodyPart">Body part:</label>
+                  <select id="bodyPart" value={selectedBodyPart} onChange={(e) => setSelectedBodyPart(e.target.value)}>
+                    <option value="Chest">Chest</option>
+                    <option value="Hand">Hand</option>
+                    <option value="Foot">Foot</option>
+                    <option value="Skull">Skull</option>
+                    <option value="Spine">Spine</option>
+                  </select>
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    handleImageUpload(e);
+                    handleImageUploadDatabase(e);
+                  }}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                />
+              </>
             )}
             <button 
               id="uploadBtn" 
@@ -534,9 +671,12 @@ const PatientDashboard = ({ onLogout }) => {
         <div className="xray-section">
           <h3>Results</h3>
           <div id="processedImage" className="xray-image">
-            {processedImage ? (
+            {processedImage && uploadedImage ? (
               <div className="analysis-results">
-                {renderAnalysisResults(processedImage)}
+                <ImageResultsRenderer 
+                  uploadedImage={uploadedImage} 
+                  processedImage={processedImage} 
+                />
               </div>
             ) : (
               <div className="placeholder-message">Upload an image to see results</div>
@@ -544,6 +684,11 @@ const PatientDashboard = ({ onLogout }) => {
           </div>
         </div>
       </div>
+      {processedImage && uploadedImage && (
+        <div className="analysis-results-container">
+          {renderAnalysisResults(analysisData)}
+        </div>
+      )}
     </div>
   );
   

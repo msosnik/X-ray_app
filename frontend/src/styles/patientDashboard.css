@@ -313,10 +313,13 @@ button:disabled {
 }
 
 .body-part-selection {
-    margin-bottom: 2vh;
+    position: relative;
+    margin-top: 13vh;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 1vw;
+    gap: 0.5vw;
+    width: 100%;
 }
 
 .body-part-selection label {
@@ -333,15 +336,16 @@ button:disabled {
     background-color: white;
     color: #65558F;
     cursor: pointer;
-    width: 200px;
+    width: 8vw;
 }
 
 .xray-content {
     display: flex;
     justify-content: space-between;
     flex-grow: 1;
-    gap: 2vw;
-    height: calc(100% - 60px);
+    gap: 0.5vh;
+    height: calc(100% - 1vh);
+    padding: 5px;
 }
 
 .xray-section {
@@ -366,7 +370,8 @@ button:disabled {
     align-items: center;
     overflow: hidden;
     background-color: #f0e6ff;
-    min-height: 200px;
+    height: 100%;
+    min-height: 50vh;
 }
 
 .xray-section:first-child{
@@ -447,23 +452,39 @@ button:disabled {
     background-color: #4A4459;
 }
 
-.analysis-details {
-    font-size: 20px;
-    line-height: 1.6;
+.analysis-results-container {
+    position: relative;
+    width: 76vw;
+    margin-top: 20px;
+    z-index: 2;
 }
 
-.analysis-details h4 {
-    font-size: 28px;
+.analysis-details-horizontal {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    background-color: #f0e6ff;
+    padding: 20px;
+    border-radius: 10px;
+    color: #65558F;
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
 }
 
-.abnormalities-section ul {
-    list-style-position: inside;
-    padding-left: 0;
-    margin-left: 0;
+.analysis-details-horizontal > div {
+    display: flex;
+    flex-direction: column;
 }
-  
-.abnormalities-section li {
-    padding-left: 0;
+
+.analysis-details-horizontal strong {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.analysis-details-horizontal ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
 .messages-container {

@@ -409,7 +409,7 @@ const DoctorDashboard = ({ onLogout }) => {
             <option value="">Select Patient</option>
             {patients.map(patient => (
               <option key={patient.id} value={patient.id}>
-                {patient.name}
+                {patient.firstName} {patient.lastName}
               </option>
             ))}
           </select>

@@ -45,6 +45,11 @@ const DoctorDashboard = ({ onLogout }) => {
     lastName: storedUserData?.lastName || '',
     email: storedUserData?.email || '',
   });
+  const [analysisResult, setAnalysisResult] = useState({
+    detectedAbnormalities: [],
+    doctorComments: '',
+    doctorReviewed: false
+  });  
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
 
@@ -314,6 +319,7 @@ const DoctorDashboard = ({ onLogout }) => {
       const blob = await response.blob();
       const imageUrl = URL.createObjectURL(blob);
       setUploadedImage(imageUrl);
+      await fetchAnalysisResult(id);
     } catch (err) {
       setXrayError('Failed to load X-ray image');
       console.error('Error:', err);
@@ -321,6 +327,56 @@ const DoctorDashboard = ({ onLogout }) => {
       setLoading(false);
     }
   };
+
+  const fetchAnalysisResult = async (imageId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      setAnalysisResult({
+        detectedAbnormalities: data.detectedAbnormalities || [],
+        doctorComments: data.doctorComments || '',
+        doctorReviewed: data.doctorReviewed
+      });
+    } catch (error) {
+      console.error('Error fetching analysis:', error);
+    }
+  };  
+
+  const submitAnalysis = async () => {
+    if (!selectedXrayId) {
+      alert('Please select an X-ray image first');
+      return;
+    }
+  
+    try {
+      const payload = {
+        id: 0,
+        detectedAbnormalities: analysisResult.detectedAbnormalities,
+        analysisDate: new Date().toISOString().split('T')[0],
+        doctorReviewed: true,
+        doctorComments: analysisResult.doctorComments,
+        xrayImage: {
+          id: selectedXrayId
+        }
+      };
+  
+      const response = await fetch('http://localhost:8080/analysis-result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!response.ok) throw new Error('Failed to submit analysis');
+      alert('Analysis submitted successfully');
+      
+    } catch (error) {
+      console.error('Error submitting analysis:', error);
+      alert('Failed to submit analysis');
+    }
+  };  
   
   const showHomeTab = () => (
     <div className="home-content">
@@ -506,22 +562,45 @@ const DoctorDashboard = ({ onLogout }) => {
           <div className="xray-image">
             <div className="analysis-results">
               {uploadedImage ? (
-                <>
-                  <div className="analysis-text">
-                    <h4>AI Analysis Summary:</h4>
-                    <ul>
-                      <li>No significant abnormalities detected</li>
-                      <li>Bone density: Normal</li>
-                      <li>Joint spacing: Within normal limits</li>
-                    </ul>
+                <div className="analysis-form">
+                  <h4>Doctor's Analysis</h4>
+                  <div className="form-group">
+                    <label>Detected Abnormalities:</label>
+                    <textarea
+                      value={analysisResult.detectedAbnormalities.join('\n')}
+                      onChange={(e) => setAnalysisResult({
+                        ...analysisResult,
+                        detectedAbnormalities: e.target.value.split('\n').filter(item => item.trim())
+                      })}
+                      placeholder="Enter each abnormality on a new line"
+                      rows={4}
+                      className="analysis-textarea"
+                    />
                   </div>
-                  <button className="generate-report-btn" onClick={() => alert("Generating report...")}>
-                    Generate Report
+                  <div className="form-group">
+                    <label>Comments:</label>
+                    <textarea
+                      value={analysisResult.doctorComments}
+                      onChange={(e) => setAnalysisResult({
+                        ...analysisResult,
+                        doctorComments: e.target.value
+                      })}
+                      placeholder="Enter your analysis comments"
+                      rows={4}
+                      className="analysis-textarea"
+                    />
+                  </div>
+                  <button 
+                    className="submit-analysis-btn" 
+                    onClick={submitAnalysis}
+                    disabled={!selectedXrayId}
+                  >
+                    Submit Analysis
                   </button>
-                </>
+                </div>
               ) : (
                 <div className="placeholder-message">
-                  Select a patient and X-ray to see results
+                  Select a patient and X-ray to add analysis
                 </div>
               )}
             </div>

@@ -25,17 +25,17 @@ public class AnalysisResultController {
     }
     @GetMapping("/image/{id}")
     public ResponseEntity<AnalysisResultDTO> getAnalysisResultByImageId(@PathVariable int id) {
-        return analysisResultService.getAnalysisResultById(id)
+        return analysisResultService.getAnalysisResultByImageId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping
-    public AnalysisResult createAnalysisResult(@RequestBody AnalysisResult analysisResult) {
+    public AnalysisResultDTO createAnalysisResult(@RequestBody AnalysisResultDTO analysisResult) {
         return analysisResultService.createAnalysisResult(analysisResult);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AnalysisResult> updateAnalysisResult(@PathVariable int id, @RequestBody AnalysisResult updatedResult) {
+    public ResponseEntity<AnalysisResultDTO> updateAnalysisResult(@PathVariable int id, @RequestBody AnalysisResultDTO updatedResult) {
         try {
             return ResponseEntity.ok(analysisResultService.updateAnalysisResult(id, updatedResult));
         } catch (RuntimeException e) {

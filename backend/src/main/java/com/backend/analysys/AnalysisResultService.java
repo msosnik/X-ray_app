@@ -34,17 +34,18 @@ public class AnalysisResultService {
         return analysisResultRepository.findByxRayImage_Id(id).map(this::convertToDTO);
     }
 
-    public AnalysisResult createAnalysisResult(AnalysisResult analysisResult) {
-        return analysisResultRepository.save(analysisResult);
+    public AnalysisResultDTO createAnalysisResult(AnalysisResultDTO dto) {
+        AnalysisResult analysisResult = convertToEntity(dto);
+        return convertToDTO( analysisResultRepository.save(analysisResult));
     }
 
-    public AnalysisResult updateAnalysisResult(int id, AnalysisResult updatedResult) {
+    public AnalysisResultDTO updateAnalysisResult(int id, AnalysisResultDTO dto) {
         return analysisResultRepository.findById(id)
                 .map(result -> {
-                    result.setDetectedAbnormalities(updatedResult.getDetectedAbnormalities());
-                    result.setDoctorComments(updatedResult.getDoctorComments());
-                    result.setDoctorReviewed(updatedResult.isDoctorReviewed());
-                    return analysisResultRepository.save(result);
+                    result.setDetectedAbnormalities(dto.getDetectedAbnormalities());
+                    result.setDoctorComments(dto.getDoctorComments());
+                    result.setDoctorReviewed(dto.isDoctorReviewed());
+                    return convertToDTO( analysisResultRepository.save(result));
                 })
                 .orElseThrow(() -> new RuntimeException("AnalysisResult not found with id " + id));
     }

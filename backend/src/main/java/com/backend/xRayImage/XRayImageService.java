@@ -126,4 +126,23 @@ public String saveImageFile(int imageId, MultipartFile file) {
         return convertToDTO(savedImage);
     }
 
+    public XRayImageDTO updateImage(int id, XRayImageDTO xRayImageDTO) {
+        return xRayImageRepository.findById(id)
+                .map(img -> {
+                    img.setImagePath(xRayImageDTO.getImagePath());
+                    img.setPatient(patientRepository.findPatientById(xRayImageDTO.getPatientId()).orElseThrow(() -> new ResourceNotFoundException("no patient with id: "+xRayImageDTO.getPatientId())));
+                    img.setBodyPart(xRayImageDTO.getBodyPart());
+                    img.setUploadDate(xRayImageDTO.getUploadDate());
+                    return convertToDTO(xRayImageRepository.save(img));
+                }
+        ).orElseThrow(() -> new ResourceNotFoundException("Image not found"));
+    }
+
+    public boolean deleteImageData(int id) {
+        boolean existed = xRayImageRepository.findById(id).isPresent();
+        if(existed) {
+            xRayImageRepository.deleteById(id);
+        }
+        return existed;
+    }
 }

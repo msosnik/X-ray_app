@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Home, Users, Calendar, Upload, MessageSquare, User, LogOut, Phone, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/doctorDashboard.css'
+import DoctorProfileDashboard from './DoctorProfileDashboard';
 import 'stream-chat-react/dist/css/index.css';
 import '@stream-io/video-react-sdk/dist/css/styles.css';
 import { StreamChat } from 'stream-chat';
@@ -792,6 +793,8 @@ const DoctorDashboard = ({ onLogout }) => {
         return showXRayAnalysisTab();
       case 'messages':
         return showMessagesTab();
+      case 'profile':
+        return <DoctorProfileDashboard />;
       default:
         return null;
     }

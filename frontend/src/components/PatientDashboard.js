@@ -397,13 +397,9 @@ const PatientDashboard = ({ onLogout }) => {
             const uploadResponseData = await uploadResponse.json();
             console.log("Uploaded full X-ray image response:", uploadResponseData);
 
-            const imageId = 1;
+            const imageId = uploadResponse.id;
 
             const analysisResponse = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
-
-            if (!analysisResponse.ok) {
-              throw new Error(`Analysis fetch failed: ${analysisResponse.status}`);
-            }
 
             const analysisData = await analysisResponse.json();
 
@@ -530,29 +526,6 @@ const PatientDashboard = ({ onLogout }) => {
     );
   };
 
-  const renderImageResults = (processedImage) => {
-    if (!processedImage) {
-      return (
-        <div className="placeholder-message">
-          Upload an image to see results
-        </div>
-      );
-    }
-
-    return (
-      <div id="processedImage" className="xray-image">
-        {uploadedImage && processedImage ? (
-          <ImageResultsRenderer 
-            uploadedImage={uploadedImage} 
-            processedImage={processedImage} 
-          />
-        ) : (
-          <div className="placeholder-message">Upload an image to see results</div>
-        )}
-      </div>
-    );
-  };
-
   const showAppointmentsTab = () => (
     <div>
       <div className="appointments-list">
@@ -607,7 +580,6 @@ const PatientDashboard = ({ onLogout }) => {
       </div>
     </div>
   );
-  
 
   const showUploadXRayTab = () => (
     <div className="upload-xray">

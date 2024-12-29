@@ -290,17 +290,25 @@ const DoctorDashboard = ({ onLogout }) => {
   }, []);
 
   const fetchPatientXrays = async (patientId) => {
+    clearStates();
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:8080/xray-images/patient/${patientId}`);
       
-      if (!response.ok) throw new Error('Failed to fetch X-ray images');
-      const data = await response.json();
-      setPatientXrays(data);
-      
-      if (data.length > 0) {
-        setSelectedXrayId(data[0].id);
-        fetchXrayImage(data[0].id);
+      if (!response.ok) {
+        if (response.status === 404) {
+          setPatientXrays([]);
+        } else {
+          throw new Error('Failed to fetch X-ray images');
+        }
+      } else {
+        const data = await response.json();
+        setPatientXrays(data);
+        
+        if (data.length > 0) {
+          setSelectedXrayId(data[0].id);
+          fetchXrayImage(data[0].id);
+        }
       }
     } catch (err) {
       setXrayError('Failed to load X-ray images');
@@ -311,6 +319,7 @@ const DoctorDashboard = ({ onLogout }) => {
   };
   
   const fetchXrayImage = async (id) => {
+    clearStates();
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:8080/xray-images/file/${id}`);
@@ -331,8 +340,17 @@ const DoctorDashboard = ({ onLogout }) => {
   const fetchAnalysisResult = async (imageId) => {
     try {
       const response = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
-      if (!response.ok) return null;
-      const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 404) {
+          setAnalysisResult({
+            detectedAbnormalities: [],
+            doctorComments: '',
+            doctorReviewed: false
+          });
+          return;
+        }
+        throw new Error('Failed to fetch analysis');
+      }      const data = await response.json();
       setAnalysisResult({
         detectedAbnormalities: data.detectedAbnormalities || [],
         doctorComments: data.doctorComments || '',
@@ -378,6 +396,16 @@ const DoctorDashboard = ({ onLogout }) => {
     }
   };  
   
+  const clearStates = () => {
+    setAnalysisResult({
+      detectedAbnormalities: [],
+      doctorComments: '',
+      doctorReviewed: false
+    });
+    setXrayError(null);
+    setUploadedImage(null);
+  };
+
   const showHomeTab = () => (
     <div className="home-content">
       <div className="welcome-message">Welcome Dr. {userData.lastName}!</div>
@@ -508,6 +536,8 @@ const DoctorDashboard = ({ onLogout }) => {
                 fetchPatientXrays(e.target.value);
               } else {
                 setUploadedImage(null);
+                setPatientXrays([]);
+                clearStates();
               }
             }}
             className="analysis-select"
@@ -546,14 +576,18 @@ const DoctorDashboard = ({ onLogout }) => {
         <div className="xray-section">
           <h3>X-Ray Image</h3>
           <div className={`xray-image ${uploadedImage ? 'has-image' : ''}`}>
-            {loading && <div>Loading...</div>}
-            {xrayError && <div className="error">{xrayError}</div>}
-            {uploadedImage ? (
+            {loading && <div className="placeholder-message">Loading...</div>}
+            {!loading && selectedPatient && patientXrays.length === 0 && (
+              <div className="placeholder-message">No X-ray images available</div>
+            )}
+            {!loading && xrayError && patientXrays.length > 0 && (
+              <div className="placeholder-message">{xrayError}</div>
+            )}
+            {!loading && !xrayError && uploadedImage && (
               <img src={uploadedImage} alt="X-ray" style={{ maxWidth: '100%', height: 'auto' }} />
-            ) : (
-              <div className="placeholder-message">
-                {selectedPatient ? 'No X-ray images available' : 'Select a patient to view X-rays'}
-              </div>
+            )}
+            {!loading && !xrayError && !uploadedImage && !selectedPatient && (
+              <div className="placeholder-message">Select a patient to view X-rays</div>
             )}
           </div>
         </div>
@@ -600,7 +634,11 @@ const DoctorDashboard = ({ onLogout }) => {
                 </div>
               ) : (
                 <div className="placeholder-message">
-                  Select a patient and X-ray to add analysis
+                  {selectedPatient ? 
+                    (patientXrays.length === 0 ? 
+                      'No X-ray images available' : 
+                      'Select an X-ray to add analysis') :
+                    'Select a patient to view X-rays'}
                 </div>
               )}
             </div>

@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { User, FileText, Activity, AlertCircle, Edit2, Save } from 'lucide-react';
-import '../styles/patientProfileDashboard.css';
+import '../styles/doctorProfileDashboard.css';
 
-const PatientProfileDashboard = () => {
+const DoctorProfileDashboard = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [patientData, setPatientData] = useState(null);
+  const [doctorData, setDoctorData] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchPatientData();
+    fetchDoctorData();
   }, []);
 
-  const fetchPatientData = async () => {
+  const fetchDoctorData = async () => {
     try {
       const storedData = localStorage.getItem('userInfo');
       if (!storedData) {
         throw new Error('No patient data found in localStorage');
       }
       
-      const localPatientData = JSON.parse(storedData);
-      const patientId = localPatientData.id;
+      const localDoctorData = JSON.parse(storedData);
+      const doctorId = localDoctorData.id;
 
-      const response = await fetch(`http://localhost:8080/patient/${patientId}`);
-      if (!response.ok) throw new Error('Failed to fetch patient data');
+      const response = await fetch(`http://localhost:8080/doctor/${doctorId}`);
+      if (!response.ok) throw new Error('Failed to fetch doctor data');
       const data = await response.json();
-      setPatientData(data);
+      setDoctorData(data);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -35,66 +35,55 @@ const PatientProfileDashboard = () => {
 
   const handleSave = async () => {
     try {
-      const patientId = patientData.id;
-      const response = await fetch(`http://localhost:8080/patient/${patientId}`, {
+      const doctorId = doctorData.id;
+      console.log('Payload being sent:', JSON.stringify(doctorData, null, 2));
+      const response = await fetch(`http://localhost:8080/doctor/${doctorId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(patientData),
+        body: JSON.stringify(doctorData),
       });
 
-      if (!response.ok) throw new Error('Failed to update patient data');
+      if (!response.ok) throw new Error('Failed to update doctor data');
       
       setIsEditing(false);
-      await fetchPatientData();
+      await fetchDoctorData();
     } catch (err) {
       setError(err.message);
     }
   };
 
   const handleInputChange = (field, value) => {
-    setPatientData(prevData => ({
+    setDoctorData(prevData => ({
       ...prevData,
       [field]: value
     }));
   };
 
-  if (loading) return <div className="loading">Loading patient data...</div>;
+  if (loading) return <div className="loading">Loading doctor data...</div>;
   if (error) return <div className="error">Error: {error}</div>;
-  if (!patientData) return <div className="error">No patient data found</div>;
+  if (!doctorData) return <div className="error">No doctor data found</div>;
 
-  const InfoItem = ({ label, value, isEditing, onChange, type = "text" }) => (
+  const InfoItem = ({ label, value, isEditing, onChange }) => (
     <div className="info-item">
       <label>{label}:</label>
       {isEditing && onChange ? (
-        type === "consent" ? (
-          <select
-            value={value ? "Yes" : "No"}
-            onChange={(e) => onChange(e.target.value === "Yes")}
-            className="consent-select"
-          >
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        ) : (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          />
-        )
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
       ) : (
-        <span>{typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}</span>
+        <span>{value}</span>
       )}
     </div>
   );
 
-
   return (
-    <div className="profile-dashboard">
+    <div className="doctor-dashboard">
       <div className="profile-header">
-        <h1>Patient Profile</h1>
+        <h1>Doctor Profile</h1>
         {isEditing ? (
           <button className="edit-button" onClick={handleSave}>
             <Save size={20} />
@@ -116,21 +105,20 @@ const PatientProfileDashboard = () => {
                 <h3>Basic Information</h3>
                 <InfoItem 
                   label="First Name" 
-                  value={patientData.firstName} 
+                  value={doctorData.passwordHash} 
                   isEditing={isEditing} 
-                  onChange={(value) => handleInputChange('firstName', value)} 
+                  onChange={(value) => handleInputChange('passwordHash', value)} 
                 />
                 <InfoItem 
                   label="Last Name" 
-                  value={patientData.lastName} 
+                  value={doctorData.lastName} 
                   isEditing={isEditing} 
                   onChange={(value) => handleInputChange('lastName', value)} 
                 />
                 <InfoItem 
-                  label="Date of Birth" 
-                  value={patientData.dateOfBirth} 
+                  label="Medical License ID" 
+                  value={doctorData.medicalLicenceId}
                   isEditing={isEditing} 
-                  onChange={(value) => handleInputChange('dateOfBirth', value)} 
                 />
               </div>
             </div>
@@ -139,21 +127,21 @@ const PatientProfileDashboard = () => {
                 <h3>Contact Information</h3>
                 <InfoItem 
                   label="Email" 
-                  value={patientData.email} 
+                  value={doctorData.email} 
                   isEditing={isEditing} 
                   onChange={(value) => handleInputChange('email', value)} 
                 />
                 <InfoItem 
                   label="Phone" 
-                  value={patientData.phoneNumber.toString()} 
+                  value={doctorData.phoneNumber.toString()} 
                   isEditing={isEditing} 
                   onChange={(value) => handleInputChange('phoneNumber', parseInt(value, 10))} 
                 />
                 <InfoItem 
-                  label="Address" 
-                  value={patientData.address} 
+                  label="Address of Clinic" 
+                  value={doctorData.clinicAddress} 
                   isEditing={isEditing} 
-                  onChange={(value) => handleInputChange('address', value)} 
+                  onChange={(value) => handleInputChange('clinicAddress', value)} 
                 />
               </div>
             </div>
@@ -161,21 +149,22 @@ const PatientProfileDashboard = () => {
               <div className="info-group">
                 <h3>Additional Information</h3>
                 <InfoItem 
-                  label="Created At" 
-                  value={patientData.createdAt} 
-                  isEditing={false} 
+                  label="Specialization" 
+                  value={doctorData.specialization}
+                  isEditing={isEditing}
+                  onChange={(value) => handleInputChange('specialization', value)} 
                 />
                 <InfoItem 
-                  label="Last Updated" 
-                  value={patientData.updatedAt || 'Never'} 
-                  isEditing={false} 
+                  label="Availability" 
+                  value={doctorData.availability}
+                  isEditing={isEditing}
+                  onChange={(value) => handleInputChange('availability', value)}
                 />
                 <InfoItem 
-                  label="Consent To Use Images" 
-                  value={patientData.consentToUseImages}
-                  isEditing={isEditing} 
-                  onChange={(value) => handleInputChange('consentToUseImages', value)}
-                  type="consent"
+                  label="Working Hours" 
+                  value={doctorData.workingHours}
+                  isEditing={isEditing}
+                  onChange={(value) => handleInputChange('workingHours', value)}
                 />
               </div>
             </div>
@@ -186,5 +175,4 @@ const PatientProfileDashboard = () => {
   );
 };
 
-
-export default PatientProfileDashboard;
+export default DoctorProfileDashboard;

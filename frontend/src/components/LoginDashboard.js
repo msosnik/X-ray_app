@@ -6,7 +6,6 @@ import '../styles/loginDashboard.css';
 const LoginDashboard = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState('patient');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,9 +28,6 @@ const LoginDashboard = ({ onLogin }) => {
         body: JSON.stringify(loginRequest)
       });
 
-      // console.log('Response status:', response.status);
-      // console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
       if (!loginResponse.ok) {
         const errorText = await loginResponse.text();
         throw new Error(errorText || 'Login failed');
@@ -45,8 +41,6 @@ const LoginDashboard = ({ onLogin }) => {
       const userId = parseInt(roleMatch[2]);
 
       if (loginResponseText.includes('Login successful')) {
-        // localStorage.setItem('userEmail', email);
-        // localStorage.setItem('userRole', selectedRole);
         const endpoint = role === 'patient' ? 'patient' : 'doctor';
 
         const usersResponse = await fetch(`http://localhost:8080/${endpoint}/`);
@@ -124,19 +118,6 @@ const LoginDashboard = ({ onLogin }) => {
               disabled={isLoading}
             />
           </div>
-          {/* <div className="input-field role-selection">
-            <label htmlFor="roleSelect">Role:</label>
-            <select 
-              id="roleSelect" 
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              className="role-select"
-              disabled={isLoading}
-            >
-              <option value="patient">Patient</option>
-              <option value="doctor">Doctor</option>
-            </select>
-          </div> */}
           <div className="button-group">
             <button 
               className="register-button" 

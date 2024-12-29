@@ -35,11 +35,21 @@ const DoctorDashboard = ({ onLogout }) => {
   const [patients, setPatients] = useState([]);
   const storedUserData = JSON.parse(localStorage.getItem('userInfo'));
   const [doctorId, setDoctorId] = useState(storedUserData?.id || null);
+  const [patientXrays, setPatientXrays] = useState([]);
+  const [selectedXrayId, setSelectedXrayId] = useState(null);
+  const [xrayImage, setXrayImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [xrayError, setXrayError] = useState(null);
   const [userData, setUserData] = useState({
     firstName: storedUserData?.firstName || 'User',
     lastName: storedUserData?.lastName || '',
     email: storedUserData?.email || '',
   });
+  const [analysisResult, setAnalysisResult] = useState({
+    detectedAbnormalities: [],
+    doctorComments: '',
+    doctorReviewed: false
+  });  
 
   const API_KEY = process.env.REACT_APP_STREAM_API_KEY;
 
@@ -279,6 +289,123 @@ const DoctorDashboard = ({ onLogout }) => {
     fetchPatients();
   }, []);
 
+  const fetchPatientXrays = async (patientId) => {
+    clearStates();
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/xray-images/patient/${patientId}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          setPatientXrays([]);
+        } else {
+          throw new Error('Failed to fetch X-ray images');
+        }
+      } else {
+        const data = await response.json();
+        setPatientXrays(data);
+        
+        if (data.length > 0) {
+          setSelectedXrayId(data[0].id);
+          fetchXrayImage(data[0].id);
+        }
+      }
+    } catch (err) {
+      setXrayError('Failed to load X-ray images');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchXrayImage = async (id) => {
+    clearStates();
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/xray-images/file/${id}`);
+      
+      if (!response.ok) throw new Error('Failed to fetch X-ray image');
+      const blob = await response.blob();
+      const imageUrl = URL.createObjectURL(blob);
+      setUploadedImage(imageUrl);
+      await fetchAnalysisResult(id);
+    } catch (err) {
+      setXrayError('Failed to load X-ray image');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAnalysisResult = async (imageId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/analysis-result/image/${imageId}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          setAnalysisResult({
+            detectedAbnormalities: [],
+            doctorComments: '',
+            doctorReviewed: false
+          });
+          return;
+        }
+        throw new Error('Failed to fetch analysis');
+      }      const data = await response.json();
+      setAnalysisResult({
+        detectedAbnormalities: data.detectedAbnormalities || [],
+        doctorComments: data.doctorComments || '',
+        doctorReviewed: data.doctorReviewed
+      });
+    } catch (error) {
+      console.error('Error fetching analysis:', error);
+    }
+  };  
+
+  const submitAnalysis = async () => {
+    if (!selectedXrayId) {
+      alert('Please select an X-ray image first');
+      return;
+    }
+  
+    try {
+      const payload = {
+        id: 0,
+        detectedAbnormalities: analysisResult.detectedAbnormalities,
+        analysisDate: new Date().toISOString().split('T')[0],
+        doctorReviewed: true,
+        doctorComments: analysisResult.doctorComments,
+        xrayImage: {
+          id: selectedXrayId
+        }
+      };
+  
+      const response = await fetch('http://localhost:8080/analysis-result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!response.ok) throw new Error('Failed to submit analysis');
+      alert('Analysis submitted successfully');
+      
+    } catch (error) {
+      console.error('Error submitting analysis:', error);
+      alert('Failed to submit analysis');
+    }
+  };  
+  
+  const clearStates = () => {
+    setAnalysisResult({
+      detectedAbnormalities: [],
+      doctorComments: '',
+      doctorReviewed: false
+    });
+    setXrayError(null);
+    setUploadedImage(null);
+  };
+
   const showHomeTab = () => (
     <div className="home-content">
       <div className="welcome-message">Welcome Dr. {userData.lastName}!</div>
@@ -400,10 +527,19 @@ const DoctorDashboard = ({ onLogout }) => {
       <div className="analysis-controls">
         <div className="analysis-select-group">
           <label htmlFor="patientSelect">Patient:</label>
-          <select 
+          <select
             id="patientSelect"
             value={selectedPatient}
-            onChange={(e) => setSelectedPatient(e.target.value)}
+            onChange={(e) => {
+              setSelectedPatient(e.target.value);
+              if (e.target.value) {
+                fetchPatientXrays(e.target.value);
+              } else {
+                setUploadedImage(null);
+                setPatientXrays([]);
+                clearStates();
+              }
+            }}
             className="analysis-select"
           >
             <option value="">Select Patient</option>
@@ -414,77 +550,95 @@ const DoctorDashboard = ({ onLogout }) => {
             ))}
           </select>
         </div>
-        <div className="analysis-select-group">
-          <label htmlFor="bodyPart">Body part:</label>
-          <select 
-            id="bodyPart"
-            value={selectedBodyPart}
-            onChange={(e) => setSelectedBodyPart(e.target.value)}
-            className="analysis-select"
-          >
-            <option value="chest">Chest</option>
-            <option value="hand">Hand</option>
-            <option value="foot">Foot</option>
-            <option value="skull">Skull</option>
-            <option value="spine">Spine</option>
-          </select>
-        </div>
+        {patientXrays.length > 0 && (
+          <div className="analysis-select-group">
+            <label htmlFor="xraySelect">Available X-rays:</label>
+            <select
+              id="xraySelect"
+              value={selectedXrayId || ''}
+              onChange={(e) => {
+                const xrayId = parseInt(e.target.value);
+                setSelectedXrayId(xrayId);
+                fetchXrayImage(xrayId);
+              }}
+              className="analysis-select"
+            >
+              {patientXrays.map(xray => (
+                <option key={xray.id} value={xray.id}>
+                  {xray.bodyPart} - {new Date(xray.uploadDate).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       <div className="xray-content">
         <div className="xray-section">
-          <h3>Original</h3>
+          <h3>X-Ray Image</h3>
           <div className={`xray-image ${uploadedImage ? 'has-image' : ''}`}>
-            {uploadedImage ? (
-              <img src={uploadedImage} alt="Original" />
-            ) : (
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      setUploadedImage(reader.result);
-                      setProcessedImage('Analysis in progress...');
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
+            {loading && <div className="placeholder-message">Loading...</div>}
+            {!loading && selectedPatient && patientXrays.length === 0 && (
+              <div className="placeholder-message">No X-ray images available</div>
             )}
-            <button 
-              className="upload-btn"
-              onClick={() => fileInputRef.current.click()}
-              style={{ display: uploadedImage ? 'none' : 'block' }}
-            >
-              Upload Image
-            </button>
+            {!loading && xrayError && patientXrays.length > 0 && (
+              <div className="placeholder-message">{xrayError}</div>
+            )}
+            {!loading && !xrayError && uploadedImage && (
+              <img src={uploadedImage} alt="X-ray" style={{ maxWidth: '100%', height: 'auto' }} />
+            )}
+            {!loading && !xrayError && !uploadedImage && !selectedPatient && (
+              <div className="placeholder-message">Select a patient to view X-rays</div>
+            )}
           </div>
         </div>
         <div className="xray-section">
           <h3>Analysis Results</h3>
           <div className="xray-image">
             <div className="analysis-results">
-              {processedImage ? (
-                <>
-                  <div className="analysis-text">
-                    <h4>AI Analysis Summary:</h4>
-                    <ul>
-                      <li>No significant abnormalities detected</li>
-                      <li>Bone density: Normal</li>
-                      <li>Joint spacing: Within normal limits</li>
-                    </ul>
+              {uploadedImage ? (
+                <div className="analysis-form">
+                  <h4>Doctor's Analysis</h4>
+                  <div className="form-group">
+                    <label>Detected Abnormalities:</label>
+                    <textarea
+                      value={analysisResult.detectedAbnormalities.join('\n')}
+                      onChange={(e) => setAnalysisResult({
+                        ...analysisResult,
+                        detectedAbnormalities: e.target.value.split('\n').filter(item => item.trim())
+                      })}
+                      placeholder="Enter each abnormality on a new line"
+                      rows={4}
+                      className="analysis-textarea"
+                    />
                   </div>
-                  <button className="generate-report-btn" onClick={() => alert("Generating report...")}>
-                    Generate Report
+                  <div className="form-group">
+                    <label>Comments:</label>
+                    <textarea
+                      value={analysisResult.doctorComments}
+                      onChange={(e) => setAnalysisResult({
+                        ...analysisResult,
+                        doctorComments: e.target.value
+                      })}
+                      placeholder="Enter your analysis comments"
+                      rows={4}
+                      className="analysis-textarea"
+                    />
+                  </div>
+                  <button 
+                    className="submit-analysis-btn" 
+                    onClick={submitAnalysis}
+                    disabled={!selectedXrayId}
+                  >
+                    Submit Analysis
                   </button>
-                </>
+                </div>
               ) : (
                 <div className="placeholder-message">
-                  Upload an image to see results
+                  {selectedPatient ? 
+                    (patientXrays.length === 0 ? 
+                      'No X-ray images available' : 
+                      'Select an X-ray to add analysis') :
+                    'Select a patient to view X-rays'}
                 </div>
               )}
             </div>

@@ -572,6 +572,36 @@ button:disabled {
     width: 100%;
 }
 
+.analysis-form {
+    padding: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+  
+.analysis-textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+  
+.submit-analysis-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+  
+.submit-analysis-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}  
+
 .messages-container {
     display: flex;
     height: 100%;

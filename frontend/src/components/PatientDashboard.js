@@ -759,7 +759,8 @@ const PatientDashboard = ({ onLogout }) => {
     }
 
     try {
-      const call = streamVideoClient.call('default', CONSULTATION_ROOM_ID);
+      const consultationRoomId = `consultation_${activeDoctor}`;
+      const call = streamVideoClient.call('default', consultationRoomId);
       
       await call.join({ create: false });
       
@@ -767,7 +768,7 @@ const PatientDashboard = ({ onLogout }) => {
       await call.microphone.enable();
   
       setVideoCall(call);
-      navigate(`/consultation/${CONSULTATION_ROOM_ID}`);
+      navigate(`/consultation/${consultationRoomId}`);
 
     } catch (error) {
       console.error('Video call join error:', error);

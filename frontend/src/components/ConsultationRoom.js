@@ -29,14 +29,11 @@ function ConsultationRoom() {
     const initializeClients = async () => {
       try {
         setLoadingState('Checking credentials');
-        const username = localStorage.getItem('userEmail').split('@')[0];
+        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
         const userTypeFromStorage = localStorage.getItem('userRole');
-        
-        console.log('Username from localStorage:', username);
-        console.log('UserType from localStorage:', userTypeFromStorage);
 
-        if (!username || !userTypeFromStorage) {
-          throw new Error('Username or UserType not found in localStorage');
+        if (!userInfo || !userTypeFromStorage) {
+          throw new Error('User information or role not found');
         }
 
         setUserType(userTypeFromStorage);
@@ -45,25 +42,22 @@ function ConsultationRoom() {
           throw new Error('Stream API key is not defined');
         }
 
+        const userId = userType === 'doctor' ? `doctor_${userInfo.id}` : `patient_${userInfo.id}`;
+
         const userDetails = {
-          id: username,
-          name: username,
-          role: userTypeFromStorage,
-          image: `https://getstream.io/random_svg/?id=${username}&name=${username}`,
+          id: userId,
+          name: `${userInfo.passwordHash} ${userInfo.lastName}`,
+          role: userType
         };
 
         const chatClientInstance = StreamChat.getInstance(apiKey);
-        const token = chatClientInstance.devToken(username);
+        const token = chatClientInstance.devToken(userId);
         await chatClientInstance.connectUser(userDetails, token);
         setChatClient(chatClientInstance);
 
         const channelId = window.location.pathname.split('/').pop();
-        const channelInstance = chatClientInstance.channel('messaging', channelId, {
-          name: 'Consultation Channel',
-          members: [username],
-          created_by_id: username,
-        });
-        
+        const channelInstance = chatClientInstance.channel('messaging', channelId);
+
         try {
           await channelInstance.watch();
         } catch (error) {
@@ -80,7 +74,6 @@ function ConsultationRoom() {
           }
         }
         
-        await channelInstance.addMembers([username]);
         setChannel(channelInstance);
 
         const videoClientInstance = new StreamVideoClient({
@@ -91,7 +84,7 @@ function ConsultationRoom() {
         setVideoClient(videoClientInstance);
 
         const callInstance = videoClientInstance.call('default', channelId);
-        await callInstance.join({ create: true });
+        await callInstance.join({ create: false });
         setCall(callInstance);
 
         setLoadingState('Ready');

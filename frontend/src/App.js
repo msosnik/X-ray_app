@@ -4,6 +4,7 @@ import LoginDashboard from './components/LoginDashboard';
 import PatientDashboard from './components/PatientDashboard';
 import DoctorDashboard from './components/DoctorDashboard';
 import ConsultationRoom from './components/ConsultationRoom';
+import RegistrationDashboard from './components/RegistrationDashboard';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -48,6 +49,7 @@ const App = () => {
         <Route path="/consultation/:consultationId" element={!isLoggedIn ? ( <Navigate to="/login" /> ) : ( <ConsultationRoom onLogout={handleLogout} /> ) } />
         <Route path="*" element={<Navigate to="/login" />} /> */}
         <Route path="/login" element={<LoginDashboard onLogin={handleLogin} />} />
+        <Route path="/register" element={<RegistrationDashboard />} />
         <Route path="/patient-dashboard" element={<PatientDashboard onLogout={handleLogout} patientInfo={userInfo}/>} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard onLogout={handleLogout} doctorInfo={userInfo} />} />
         <Route path="/consultation/:consultationId" element={<ConsultationRoom onLogout={handleLogout} userInfo={userInfo} userRole={userRole}/>} />

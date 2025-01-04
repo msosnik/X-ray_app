@@ -5,7 +5,7 @@ import '../styles/registrationDashboard.css';
 
 const RegistrationDashboard = () => {
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState(null);
+  const [selectedRole, setSelectedRole] = useState('patient');
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ const RegistrationDashboard = () => {
     { name: 'dateOfBirth', label: 'Date of Birth', type: 'date', required: true },
     { name: 'address', label: 'Address', type: 'text', required: true },
     { name: 'phoneNumber', label: 'Phone Number', type: 'number', required: true },
-    { name: 'consentToUseImages', label: 'Consent to Use Images', type: 'checkbox', required: true }
+    { name: 'consentToUseImages', label: 'Consent to Use Images', type: 'select', required: true, options: ['Yes', 'No'] }
   ];
 
   const handleInputChange = (field, value) => {
@@ -85,7 +85,7 @@ const RegistrationDashboard = () => {
 
   return (
     <div className="login-container">
-      <div className="login-box">
+      <div className="registration-box">
         <h1 className="login-title">Registration</h1>
         <button 
           onClick={() => navigate('/login')} 
@@ -106,72 +106,63 @@ const RegistrationDashboard = () => {
           </div>
         )}
 
-        {!selectedRole ? (
-          <div className="role-selection">
-            <button
-              onClick={() => setSelectedRole('doctor')}
-              className="role-button"
-            >
-              <span>Register as Doctor</span>
-            </button>
-            <button
-              onClick={() => setSelectedRole('patient')}
-              className="role-button"
-            >
-              <span>Register as Patient</span>
-            </button>
+        <div className="role-selection">
+          <button
+            onClick={() => setSelectedRole('doctor')}
+            className={`role-button ${selectedRole === 'doctor' ? 'active' : ''}`}
+          >
+            <span>Register as Doctor</span>
+          </button>
+          <button
+            onClick={() => setSelectedRole('patient')}
+            className={`role-button ${selectedRole === 'patient' ? 'active' : ''}`}
+          >
+            <span>Register as Patient</span>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="registration-form">
+          <div className="form-fields">
+            {(selectedRole === 'doctor' ? doctorFields : patientFields).map((field) => (
+              <div key={field.name} className="input-field">
+                <label>
+                  {field.label}
+                  {field.required && <span className="required">*</span>}
+                </label>
+                {field.type === 'select' ? (
+                  <select
+                    value={formData[field.name] || ''}
+                    onChange={(e) => handleInputChange(field.name, e.target.value)}
+                    required={field.required}
+                  >
+                    <option value="">Select an option</option>
+                    {field.options.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.type}
+                    value={formData[field.name] || ''}
+                    onChange={(e) => handleInputChange(field.name, e.target.value)}
+                    required={field.required}
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="registration-form">
-            <div className="form-header">
-              <h2>{selectedRole === 'doctor' ? 'Doctor' : 'Patient'} Registration</h2>
-              <button
-                type="button"
-                onClick={() => setSelectedRole(null)}
-                className="change-role-button"
-              >
-                Change Role
-              </button>
-            </div>
 
-            <div className="form-fields">
-              {(selectedRole === 'doctor' ? doctorFields : patientFields).map((field) => (
-                <div key={field.name} className="input-field">
-                  <label>
-                    {field.label}
-                    {field.required && <span className="required">*</span>}
-                  </label>
-                  {field.type === 'checkbox' ? (
-                    <div className="checkbox-field">
-                      <input
-                        type="checkbox"
-                        checked={formData[field.name] || false}
-                        onChange={(e) => handleInputChange(field.name, e.target.checked)}
-                      />
-                      <span>I consent to the use of my images</span>
-                    </div>
-                  ) : (
-                    <input
-                      type={field.type}
-                      value={formData[field.name] || ''}
-                      onChange={(e) => handleInputChange(field.name, e.target.value)}
-                      required={field.required}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="form-submit-button"
-            >
-              <span>{loading ? 'Registering...' : 'Register'}</span>
-              {!loading && <ArrowRight size={24} />}
-            </button>
-          </form>
-        )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="form-submit-button"
+          >
+            <span>{loading ? 'Registering...' : 'Register'}</span>
+            {!loading && <ArrowRight size={24} />}
+          </button>
+        </form>
       </div>
     </div>
   );

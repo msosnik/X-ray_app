@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,8 +48,23 @@ public class XRayImageController {
     public ResponseEntity<Resource> getImageFile(@PathVariable int id) {
         Resource file = xRayImageService.getImageFileById(id);
         HttpHeaders headers = new HttpHeaders();
+
+        String contentType;
+        try {
+            Path filePath = file.getFile().toPath();
+            contentType = Files.probeContentType(filePath);
+        } catch (IOException e) {
+            contentType = "application/octet-stream"; // Default fallback
+        }
+
+        if (contentType == null || !contentType.startsWith("image/")) {
+            contentType = "application/octet-stream";
+        }
+
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"");
-        headers.add(HttpHeaders.CONTENT_TYPE, "image/jpeg"); // Or detect type dynamically
+        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+
+//        headers.add(HttpHeaders.CONTENT_TYPE, "image/jpeg"); // Or detect type dynamically
         return new ResponseEntity<>(file, headers, HttpStatus.OK);
     }
 

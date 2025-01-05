@@ -41,8 +41,8 @@ public class DoctorService {
         return new DoctorDTO(
                 doctor.getId(),
                 doctor.getEmail(),
-                doctor.getFirstName(),
                 doctor.getPasswordHash(),
+                doctor.getFirstName(),
                 doctor.getLastName(),
                 doctor.getCreatedAt(),
                 doctor.getUpdatedAt(),

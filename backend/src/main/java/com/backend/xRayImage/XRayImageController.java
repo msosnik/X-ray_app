@@ -57,9 +57,9 @@ public class XRayImageController {
     }
 
     @PostMapping("/{id}/upload")
-    public ResponseEntity<String> uploadImage(@PathVariable int id, @RequestParam("file") MultipartFile file) {
-        String imagePath = xRayImageService.saveImageFile(id, file);
-        return ResponseEntity.ok(imagePath);
+    public ResponseEntity<XRayImageDTO> uploadImage(@PathVariable int id, @RequestParam("file") MultipartFile file) {
+        XRayImageDTO image = xRayImageService.saveImageFile(id, file);
+        return ResponseEntity.ok(image);
     }
 
     @PostMapping("/full")

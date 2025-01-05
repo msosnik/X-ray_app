@@ -49,7 +49,7 @@ public class XRayImageService {
     private XRayImageDTO convertToDTO(XRayImage image) {
         XRayImageDTO dto = new XRayImageDTO();
         dto.setId(image.getId());
-        dto.setImagePath(image.getImagePath());
+//        dto.setImagePath(image.getImagePath());
         dto.setPatientId(image.getPatient().getId());
         dto.setUploadDate(image.getUploadDate());
         dto.setBodyPart(image.getBodyPart());
@@ -58,7 +58,7 @@ public class XRayImageService {
 
     private XRayImage convertToEntity(XRayImageDTO dto) {
         XRayImage image = new XRayImage();
-        image.setImagePath(dto.getImagePath());
+//        image.setImagePath(dto.getImagePath());
         image.setPatient(patientRepository.findPatientById(dto.getPatientId()).orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: "+ dto.getPatientId())));
         image.setUploadDate(dto.getUploadDate());
         image.setBodyPart(dto.getBodyPart());
@@ -92,7 +92,7 @@ public class XRayImageService {
         return convertToDTO(savedImage);
     }
 
-public String saveImageFile(int imageId, MultipartFile file) {
+public XRayImageDTO saveImageFile(int imageId, MultipartFile file) {
     String uploadDir = "uploads/images";
     String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
     Path uploadPath = Paths.get(uploadDir);
@@ -113,7 +113,7 @@ public String saveImageFile(int imageId, MultipartFile file) {
     } catch (IOException e) {
         throw new RuntimeException("Error saving file", e);
     }
-    return savedImage.getImagePath();
+    return convertToDTO(savedImage);
 }
 
 
@@ -129,7 +129,7 @@ public String saveImageFile(int imageId, MultipartFile file) {
     public XRayImageDTO updateImage(int id, XRayImageDTO xRayImageDTO) {
         return xRayImageRepository.findById(id)
                 .map(img -> {
-                    img.setImagePath(xRayImageDTO.getImagePath());
+//                    img.setImagePath(xRayImageDTO.getImagePath());
                     img.setPatient(patientRepository.findPatientById(xRayImageDTO.getPatientId()).orElseThrow(() -> new ResourceNotFoundException("no patient with id: "+xRayImageDTO.getPatientId())));
                     img.setBodyPart(xRayImageDTO.getBodyPart());
                     img.setUploadDate(xRayImageDTO.getUploadDate());

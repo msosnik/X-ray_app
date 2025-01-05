@@ -37,7 +37,8 @@ const LoginDashboard = ({ onLogin }) => {
 
       const loginResponseText = await loginResponse.text();
 
-      const roleMatch = loginResponseText.match(/Login successful for user: (\w+)(\d+)/);
+      console.log(loginResponseText);
+      const roleMatch = loginResponseText.match(/Login successful for user: ([A-Z]+)(\d+)/);
 
       const role = roleMatch[1].toLowerCase();
       const userId = parseInt(roleMatch[2]);

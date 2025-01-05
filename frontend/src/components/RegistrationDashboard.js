@@ -48,27 +48,71 @@ const RegistrationDashboard = () => {
     setError(null);
 
     try {
-      const endpoint = selectedRole === 'doctor' ? '/doctor' : '/patient';
+      const endpoint = selectedRole === 'doctor' ? '/doctor/' : '/patient/';
+      
+      const baseRequestData = {
+        id: 0,
+        email: String(formData.email || ''),
+        passwordHash: String(formData.passwordHash || ''),
+        firstName: String(formData.firstName || ''),
+        lastName: String(formData.lastName || ''),
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0],
+        phoneNumber: parseInt(formData.phoneNumber, 10) || 0,
+      };
+  
+      let requestData;
+      if (selectedRole === 'doctor') {
+        requestData = {
+          ...baseRequestData,
+          medicalLicenceId: parseInt(formData.medicalLicenceId, 10) || 0,
+          clinicAddress: String(formData.clinicAddress || ''),
+          specialization: String(formData.specialization || ''),
+          availability: String(formData.availability || ''),
+          workingHours: String(formData.workingHours || ''),
+          patientIds: [0],
+          appointmentList: [0]
+        };
+      } else {
+        requestData = {
+          ...baseRequestData,
+          dateOfBirth: String(formData.dateOfBirth || ''),
+          address: String(formData.address || ''),
+          consentToUseImages: formData.consentToUseImages === 'Yes',
+          xrayImages: [0],
+          doctorList: [0],
+          appointmentList: [0]
+        };
+      }
+
+      console.log('Request URL:', `http://localhost:8080${endpoint}`);
+      console.log('Request payload:', JSON.stringify(requestData, null, 2));
+        
       const response = await fetch(`http://localhost:8080${endpoint}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'accept': '*/*',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...formData,
-          id: 0,
-          createdAt: new Date().toISOString().split('T')[0],
-          updatedAt: new Date().toISOString().split('T')[0],
-          patientIds: [],
-          appointmentList: [],
-          doctorList: [],
-          xrayImages: []
-        }),
+        body: JSON.stringify(requestData),
       });
 
+      const responseData = await response.text();
+      console.log('Server response:', responseData);
+  
       if (!response.ok) {
-        throw new Error('Registration failed');
-      }
+        let errorMessage;
+        try {
+          const errorData = JSON.parse(responseData);
+          errorMessage = errorData.message || errorData.error || JSON.stringify(errorData);
+        } catch (e) {
+          errorMessage = responseData || `Registration failed with status: ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }  
+
+      const successData = responseData ? JSON.parse(responseData) : null;
+      console.log('Success response:', successData);
 
       setSuccessMessage('Registration successful! Redirecting to login...');
       
@@ -78,6 +122,7 @@ const RegistrationDashboard = () => {
       
     } catch (err) {
       setError(err.message);
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }

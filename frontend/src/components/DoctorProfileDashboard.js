@@ -105,9 +105,9 @@ const DoctorProfileDashboard = () => {
                 <h3>Basic Information</h3>
                 <InfoItem 
                   label="First Name" 
-                  value={doctorData.passwordHash} 
+                  value={doctorData.firstName} 
                   isEditing={isEditing} 
-                  onChange={(value) => handleInputChange('passwordHash', value)} 
+                  onChange={(value) => handleInputChange('firstName', value)} 
                 />
                 <InfoItem 
                   label="Last Name" 

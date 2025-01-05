@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { LogIn, UserPlus, ChevronDown } from 'lucide-react';
 import '../styles/loginDashboard.css';
@@ -8,6 +9,7 @@ const LoginDashboard = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     setError('');
@@ -35,7 +37,8 @@ const LoginDashboard = ({ onLogin }) => {
 
       const loginResponseText = await loginResponse.text();
 
-      const roleMatch = loginResponseText.match(/Login successful for user: (\w+)(\d+)/);
+      console.log(loginResponseText);
+      const roleMatch = loginResponseText.match(/Login successful for user: ([A-Z]+)(\d+)/);
 
       const role = roleMatch[1].toLowerCase();
       const userId = parseInt(roleMatch[2]);
@@ -82,7 +85,7 @@ const LoginDashboard = ({ onLogin }) => {
   };
 
   const handleRegister = () => {
-    alert('Register functionality to be implemented');
+    navigate('/register');
   };
 
   const handleForgotPassword = (e) => {

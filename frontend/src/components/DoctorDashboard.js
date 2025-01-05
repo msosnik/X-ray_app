@@ -41,6 +41,8 @@ const DoctorDashboard = ({ onLogout }) => {
   const [xrayImage, setXrayImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [xrayError, setXrayError] = useState(null);
+  const [isEditingAnalysis, setIsEditingAnalysis] = useState(false);
+  const [analysisId, setAnalysisId] = useState(null);
   const [userData, setUserData] = useState({
     firstName: storedUserData?.firstName || 'User',
     lastName: storedUserData?.lastName || '',
@@ -351,14 +353,22 @@ const DoctorDashboard = ({ onLogout }) => {
           return;
         }
         throw new Error('Failed to fetch analysis');
-      }      const data = await response.json();
+      }
+
+      const data = await response.json();
+      console.log('Fetched analysis data:', data);
+
       setAnalysisResult({
         detectedAbnormalities: data.detectedAbnormalities || [],
         doctorComments: data.doctorComments || '',
         doctorReviewed: data.doctorReviewed
       });
+      setIsEditingAnalysis(true);
+      setAnalysisId(data.id);
     } catch (error) {
       console.error('Error fetching analysis:', error);
+      setIsEditingAnalysis(false);
+      setAnalysisId(null);
     }
   };  
 
@@ -369,31 +379,59 @@ const DoctorDashboard = ({ onLogout }) => {
     }
   
     try {
-      const payload = {
-        id: 0,
-        detectedAbnormalities: analysisResult.detectedAbnormalities,
-        analysisDate: new Date().toISOString().split('T')[0],
-        doctorReviewed: true,
-        doctorComments: analysisResult.doctorComments,
-        xrayImage: {
-          id: selectedXrayId
-        }
-      };
-  
-      const response = await fetch('http://localhost:8080/analysis-result', {
-        method: 'POST',
+      let payload;
+      
+      if (isEditingAnalysis) {
+        payload = {
+          id: analysisId,
+          detectedAbnormalities: analysisResult.detectedAbnormalities,
+          analysisDate: new Date().toISOString().split('T')[0],
+          doctorReviewed: true,
+          doctorComments: analysisResult.doctorComments,
+          xrayImage: {
+            id: selectedXrayId
+          }
+        };
+      } else {
+        payload = {
+          id: 0,
+          xrayImageId: selectedXrayId,
+          detectedAbnormalities: analysisResult.detectedAbnormalities,
+          analysisDate: new Date().toISOString().split('T')[0],
+          doctorReviewed: true,
+          doctorComments: analysisResult.doctorComments
+        };
+      }
+
+      console.log('Submitting analysis payload:', payload);
+
+      const url = isEditingAnalysis 
+        ? `http://localhost:8080/analysis-result/${analysisId}`
+        : 'http://localhost:8080/analysis-result';
+    
+      const method = isEditingAnalysis ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       });
   
-      if (!response.ok) throw new Error('Failed to submit analysis');
-      alert('Analysis submitted successfully');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
+        throw new Error(`Failed to ${isEditingAnalysis ? 'update' : 'submit'} analysis: ${errorText}`);
+      }
+
+      alert(`Analysis ${isEditingAnalysis ? 'updated' : 'submitted'} successfully`);
+      
+      await fetchAnalysisResult(selectedXrayId);
       
     } catch (error) {
       console.error('Error submitting analysis:', error);
-      alert('Failed to submit analysis');
+      alert(`Failed to ${isEditingAnalysis ? 'update' : 'submit'} analysis: ${error.message}`);
     }
   };  
   
@@ -405,6 +443,8 @@ const DoctorDashboard = ({ onLogout }) => {
     });
     setXrayError(null);
     setUploadedImage(null);
+    setIsEditingAnalysis(false);
+    setAnalysisId(null);
   };
 
   const showHomeTab = () => (
@@ -598,15 +638,19 @@ const DoctorDashboard = ({ onLogout }) => {
             <div className="analysis-results">
               {uploadedImage ? (
                 <div className="analysis-form">
-                  <h4>Doctor's Analysis</h4>
+                  <h4>{isEditingAnalysis ? 'Edit Analysis' : "Doctor's Analysis"}</h4>
                   <div className="form-group">
                     <label>Detected Abnormalities:</label>
                     <textarea
                       value={analysisResult.detectedAbnormalities.join('\n')}
-                      onChange={(e) => setAnalysisResult({
-                        ...analysisResult,
-                        detectedAbnormalities: e.target.value.split('\n').filter(item => item.trim())
-                      })}
+                      onChange={(e) => {
+                        const newValue = e.target.value;
+                    
+                        setAnalysisResult((prev) => ({
+                          ...prev,
+                          detectedAbnormalities: newValue.split('\n'),
+                        }));
+                      }}
                       placeholder="Enter each abnormality on a new line"
                       rows={4}
                       className="analysis-textarea"
@@ -630,7 +674,7 @@ const DoctorDashboard = ({ onLogout }) => {
                     onClick={submitAnalysis}
                     disabled={!selectedXrayId}
                   >
-                    Submit Analysis
+                    {isEditingAnalysis ? 'Update Analysis' : 'Submit Analysis'}
                   </button>
                 </div>
               ) : (

@@ -711,7 +711,7 @@ const DoctorDashboard = ({ onLogout }) => {
           apiKey: API_KEY, 
           user: { 
             id: USER_ID, 
-            name: 'Dr. Jane Smith' 
+            name: `${storedUserData.passwordHash} ${storedUserData.lastName}`
           },
           token: USER_TOKEN
         });
@@ -735,7 +735,8 @@ const DoctorDashboard = ({ onLogout }) => {
   const startVideoCall = async (patient) => {
     if (!streamVideoClient) return;
     try {
-      const call = streamVideoClient.call('default', CONSULTATION_ROOM_ID);
+      const consultationRoomId = `consultation_${doctorId}`;
+      const call = streamVideoClient.call('default', consultationRoomId);
       
       await call.create({
         data: {
@@ -754,7 +755,7 @@ const DoctorDashboard = ({ onLogout }) => {
       await call.microphone.enable();
   
       setVideoCall(call);
-      navigate(`/consultation/${CONSULTATION_ROOM_ID}`);
+      navigate(`/consultation/${consultationRoomId}`);
     } catch (error) {
       console.error('Video call error:', error);
       alert(`Failed to start video call: ${error.message}`);

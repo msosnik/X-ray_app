@@ -6,7 +6,7 @@ import java.time.LocalDate;
 @Data
 public class XRayImageDTO {
     private int id;
-    private String imagePath;
+//    private String imagePath;
     private int patientId;
     private LocalDate uploadDate;
     private String bodyPart;

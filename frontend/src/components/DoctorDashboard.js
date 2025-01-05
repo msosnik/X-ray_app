@@ -711,7 +711,7 @@ const DoctorDashboard = ({ onLogout }) => {
           apiKey: API_KEY, 
           user: { 
             id: USER_ID, 
-            name: `${storedUserData.passwordHash} ${storedUserData.lastName}`
+            name: `${storedUserData.firstName} ${storedUserData.lastName}`
           },
           token: USER_TOKEN
         });

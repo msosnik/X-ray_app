@@ -27,7 +27,7 @@ const PatientDashboard = ({ onLogout }) => {
   const fileInputRef = useRef(null);
   const [videoCall, setVideoCall] = useState(null);
   const [streamVideoClient, setStreamVideoClient] = useState(null);
-  const [selectedBodyPart, setSelectedBodyPart] = useState('Chest');
+  const [selectedBodyPart, setSelectedBodyPart] = useState('Hand');
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -110,7 +110,7 @@ const PatientDashboard = ({ onLogout }) => {
             const doctorData = await doctorResponse.json();
             return {
               id: appointment.id,
-              doctor: `Dr. ${doctorData.passwordHash} ${doctorData.lastName}`,
+              doctor: `Dr. ${doctorData.firstName} ${doctorData.lastName}`,
               status: appointment.status || 'SCHEDULED',
               date: new Date(appointment.appointmentDateTime).toISOString().split('T')[0],
               time: new Date(appointment.appointmentDateTime).toLocaleTimeString('en-US', {
@@ -276,8 +276,8 @@ const PatientDashboard = ({ onLogout }) => {
         
         const formattedDoctors = doctorsData.map(doctor => ({
           id: doctor.id,
-          name: doctor.passwordHash,
-          firstName: doctor.passwordHash,
+          name: doctor.firstName,
+          firstName: doctor.firstName,
           lastName: doctor.lastName,
           specialization: doctor.specialization,
           availability: doctor.availability
@@ -357,10 +357,10 @@ const PatientDashboard = ({ onLogout }) => {
     const currentDate = new Date().toISOString().split('T')[0];
 
     const imageMetadata = {
-        patientId: 1,
+        patientId: patientId,
         bodyPart: selectedBodyPart,
         uploadDate: currentDate,
-        imagePath: "wololo",
+        imagePath: "",
     };
 
     if (file && file.type.startsWith("image/")) {

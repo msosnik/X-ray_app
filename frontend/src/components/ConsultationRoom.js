@@ -46,7 +46,7 @@ function ConsultationRoom() {
 
         const userDetails = {
           id: userId,
-          name: `${userInfo.passwordHash} ${userInfo.lastName}`,
+          name: `${userInfo.firstName} ${userInfo.lastName}`,
           role: userType
         };
 

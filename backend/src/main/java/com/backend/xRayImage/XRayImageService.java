@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -145,4 +146,29 @@ public XRayImageDTO saveImageFile(int imageId, MultipartFile file) {
         }
         return existed;
     }
+
+    public List<Resource> getConsentedImages() {
+        List<XRayImage> images = xRayImageRepository.findAll().stream()
+                .filter(image -> image.getPatient().isConsentToUseImages())
+                .toList();
+//        List<XRayImage> images = xRayImageRepository.findAllByPatientConsentTrue();
+
+        String baseDirectory = "uploads";
+        List<Resource> resources = new ArrayList<>();
+
+        for (XRayImage image : images) {
+            try {
+                Path filePath = Paths.get(baseDirectory, image.getImagePath());
+                if (Files.exists(filePath) && Files.isReadable(filePath)) {
+                    resources.add(new UrlResource(filePath.toUri()));
+                } else {
+                    throw new RuntimeException("File not found or not readable: " + image.getImagePath());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Error reading file: " + image.getImagePath(), e);
+            }
+        }
+        return resources;
+    }
+
 }

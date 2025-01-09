@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { LogIn, UserPlus, ChevronDown } from 'lucide-react';
+import { LogIn, UserPlus, Download } from 'lucide-react';
 import '../styles/loginDashboard.css';
 
 const LoginDashboard = ({ onLogin }) => {
@@ -9,6 +9,7 @@ const LoginDashboard = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -93,6 +94,41 @@ const LoginDashboard = ({ onLogin }) => {
     alert('Forgot password functionality to be implemented');
   };
 
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch('http://localhost:8080/xray-images/files/consented', {
+        method: 'GET',
+        headers: {
+          'accept': '*/*'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download files');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+
+      a.href = url;
+      a.download = 'consented-images.zip';
+
+      document.body.appendChild(a);
+      a.click();
+      
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+    } catch (err) {
+      console.error('Download error:', err);
+      setError('Failed to download files. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -123,12 +159,24 @@ const LoginDashboard = ({ onLogin }) => {
           </div>
           <div className="button-group">
             <button 
+              className="download-button" 
+              onClick={handleDownload}
+              disabled={isDownloading}
+            >
+              <span className="button-content">
+                <span className="button-text">Download</span>
+                <Download size={24} />
+              </span>
+            </button>
+            <button 
               className="register-button" 
               onClick={handleRegister}
               disabled={isLoading}
             >
-              <UserPlus size={24} />
-              <span>Register</span>
+              <span className="button-content">
+                <span className="button-text">Register</span>
+                <UserPlus size={24} />
+              </span>
             </button>
             <button 
               className="login-button" 
@@ -136,10 +184,10 @@ const LoginDashboard = ({ onLogin }) => {
               disabled={isLoading}
             >
               {isLoading ? 'Logging in...' : (
-                <>
+                <span className="button-content">
+                  <span className="button-text">Login</span>
                   <LogIn size={24} />
-                  <span>Login</span>
-                </>
+                </span>
               )}
             </button>
           </div>

@@ -24,7 +24,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 200px;
+    width: 180px;
     height: 60px;
     font-size: 22px;
     line-height: 28px;
@@ -53,15 +53,6 @@
 
 .login-button:hover {
     background: #4A4459;
-}
-
-.register-button {
-    background: #E8DEF8;
-    color: #4A4459;
-}
-
-.register-button:hover {
-    background: #D6BCFF;
 }
 
 .login-button span, .register-button span {

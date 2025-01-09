@@ -61,11 +61,11 @@
     justify-content: center;
 }
 
-.login-button, .register-button {
+.login-button, .register-button, .download-button {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 200px;
+    width: 180px;
     height: 60px;
     font-size: 22px;
     line-height: 28px;
@@ -73,6 +73,19 @@
     border-radius: 100px;
     cursor: pointer;
     transition: background-color 0.3s;
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.button-text {
+    flex: 0 0 auto;
+    white-space: nowrap;
 }
 
 .login-button {
@@ -85,16 +98,26 @@
 }
 
 .register-button {
+    background: #D1C4E9;
+    color: #4A4459;
+}
+
+.download-button {
     background: #E8DEF8;
     color: #4A4459;
 }
 
 .register-button:hover {
+    background: #B39DDB;
+}
+
+.download-button:hover {
     background: #D6BCFF;
 }
 
-.login-button span, .register-button span {
-    margin-left: 8px;
+.download-button:disabled {
+    background: #E0E0E0;
+    cursor: not-allowed;
 }
 
 .forgot-password {

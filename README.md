@@ -16,6 +16,22 @@ java -jar build/libs/backend-0.0.1-SNAPSHOT.jar
 
 By default, the application will run on http://localhost:8080
 
+### Detection Model
+
+Download the model [here](https://drive.google.com/file/d/1vjrQL2f61aI1Ea2kBO1MXnEuGT03BAI7/view?usp=drivesdk) or copy the link from detection/model.txt and place the file in /detection directory 
+
+#### Install Python requirements:
+```bash
+pip install -r requirements.txt
+```
+
+#### Run the detection service:
+```bash
+python main_app.py
+```
+
+By default, the detection service will run on http://localhost:8000
+
 ### Frontend
 
 #### Install the dependencies using this command:
@@ -40,6 +56,10 @@ By default, the React app will run on http://localhost:3000
 │   ├── uploads/images (Stores uploaded images)
 │   ├── build.gradle (Gradle build file)
 │   └── settings.gradle (Gradle project settings)
+├── detection/
+│   ├── main_app.py (Detection service application)
+│   ├── model.txt (Model placeholder)
+│   └── requirements.txt (Python dependencies)
 ├── frontend/
 │   ├── package.json (Contains frontend project dependencies)
 │   ├── package-lock.json (Ensures consistent dependency versions)

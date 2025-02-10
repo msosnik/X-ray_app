@@ -1,6 +1,33 @@
 # X-ray_app
 Web application for analysing X-ray photos, written for an engineering thesis
 
+### Directory structure
+```bash
+.
+├── backend/
+│   ├── src/main/
+│   │   ├── java/com/backend/ (Java source files)
+│   │   └── resources/application.propertis (Spring Boot configuration)
+│   ├── uploads/images (Stores uploaded images)
+│   ├── build.gradle (Gradle build file)
+│   └── settings.gradle (Gradle project settings)
+├── detection/
+│   ├── main_app.py (Detection service application)
+│   ├── model.txt (Model placeholder)
+│   └── requirements.txt (Python dependencies)
+├── doc/
+│   ├── Xray_thesis.pdf (engineering thesis on this app)
+│   └── System_presentation.pdf (PP presentation on the system)
+├── frontend/
+│   ├── package.json (Contains frontend project dependencies)
+│   ├── package-lock.json (Ensures consistent dependency versions)
+│   └── src
+│       ├── App.js (Contains the main application logic)
+│       ├── components/ (React components for each dashboard)
+│       └── styles/ (CSS styles for each respective dashboard)
+└── README.md (This file)
+
+```
 ## Build and Run  
 
 ### Backend
@@ -46,27 +73,3 @@ npm start
 
 By default, the React app will run on http://localhost:3000
 
-### Directory structure
-```bash
-.
-├── backend/
-│   ├── src/main/
-│   │   ├── java/com/backend/ (Java source files)
-│   │   └── resources/application.propertis (Spring Boot configuration)
-│   ├── uploads/images (Stores uploaded images)
-│   ├── build.gradle (Gradle build file)
-│   └── settings.gradle (Gradle project settings)
-├── detection/
-│   ├── main_app.py (Detection service application)
-│   ├── model.txt (Model placeholder)
-│   └── requirements.txt (Python dependencies)
-├── frontend/
-│   ├── package.json (Contains frontend project dependencies)
-│   ├── package-lock.json (Ensures consistent dependency versions)
-│   └── src
-│       ├── App.js (Contains the main application logic)
-│       ├── components/ (React components for each dashboard)
-│       └── styles/ (CSS styles for each respective dashboard)
-└── README.md (This file)
-
-```
